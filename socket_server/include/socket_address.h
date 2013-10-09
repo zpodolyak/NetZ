@@ -12,7 +12,7 @@ public:
 	int GetPort() const { return mIsResolved ? mAddress.sin_port : -1;
 	void SetHostString(const std::string &host_string, unsigned short port=-1);
 	std::string GetHostName() const { return mUnResolvedHostString; }	
-	const sockaddr_in& GetAddress() const;
+	const sockaddr_in& GetClientAddress() const { return mAddress; } // TODO: this seems wrong especially if it's unresolved
 	void SetResolvedAddress(const sockaddr_in &addr);
 private:
 	bool  ResolveHost();

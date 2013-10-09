@@ -29,8 +29,8 @@ public:
 	int Write(const char *data, int length);
 	int ReadTo(char *buffer, int buff_length);
 	int WriteTo(char *data, int length, ClientAddress &addr);
-	void Bind(int port);
-	void Listen(int port);
+	void Bind(unsigned short port);
+	void Listen(unsigned short port);
 	SocketFD Accept(ClientAddress &addr);
 	void Close();
 	void Connect(ClientAddress &addr);
