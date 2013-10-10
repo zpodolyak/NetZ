@@ -1,15 +1,17 @@
-#ifndef S_SERVER_H
-#define S_SERVER_H
+#ifndef S_SOCKET_H
+#define S_SOCKET_H
 
 struct SocketError
 {
 	enum eError
 	{
 		CONNECTION_ERROR,
+		SOCKET_OPTIONS_FAILED,
 		UNSPECIFIED_ERROR
 	};
 
 	eError mError;
+	std::string mFunctionName;
 	std::string mErrorText;
 
 	SocketError() : mError(UNSPECIFIED_ERROR) {}
@@ -29,17 +31,17 @@ public:
 	int Write(const char *data, int length);
 	int ReadTo(char *buffer, int buff_length);
 	int WriteTo(char *data, int length, ClientAddress &addr);
-	void Bind(unsigned short port);
 	void Listen(unsigned short port);
-	SocketFD Accept(ClientAddress &addr);
+	SSocket* Accept(ClientAddress &addr);
 	void Close();
 	void Connect(ClientAddress &addr);
-	void CreateStreamSocket();
-	void CreateDatagramSocket();
+	bool CreateSocket(int type, unsigned short);
 	const SocketError& GetError() const { return mError; }
 private:
+	void SetupSocket();
+	void SetError(SocketError::eError err, const char *error_text);
 	SocketFD mSocket;
-	SocketError mError;
+	SocketError mSocketError;
 };
 
 #endif
