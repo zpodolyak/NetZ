@@ -1,4 +1,4 @@
-include "common.h"
+#include "common.h"
 
 ClientAddress::ClientAddress()
 : mIsResolved(false)
@@ -32,10 +32,10 @@ bool ClientAddress::ResolveHost()
 	std::string::size_type found=mUnresolvedHostString.find_first_of(":");
 	std::string port;
 
-	if(found!=std::string::npos && inet_pton(AF_INET,host_string.substr(0,found),&(mAddress.sin_addr)) > 0)
+	if(found!=std::string::npos && inet_pton(AF_INET,mUnresolvedHostString.substr(0,found).c_str(),&(mAddress.sin_addr)) > 0)
 	{
-		SetPort(atoi(host_string.substr(found).c_str()));
-		port=host_string.substr(found);	
+		SetPort(atoi(mUnresolvedHostString.substr(found).c_str()));
+		port=mUnresolvedHostString.substr(found);	
 		return true;
 	}
 
@@ -47,7 +47,7 @@ bool ClientAddress::ResolveHost()
 	hints.ai_flags = AI_CANONNAME;
 	port=to_string(mAddress.sin_port);
 
-	if ((status = getaddrinfo(mUnresolvedHostString.c_str(), port.c_str(), &hints, &res)) != 0) {
+	if ((status = getaddrinfo(mUnresolvedHostString.c_str(), port.c_str(), &hints, &res)) != 0) 
 	{	
 		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(status));
 		return false;
@@ -57,12 +57,12 @@ bool ClientAddress::ResolveHost()
 	{
 		if(p->ai_family!=AF_INET)
 			continue;
-		mAddress.sin_addr=((const struct sock_addr_in*)p->ai_addr)->sin_addr;
+		mAddress.sin_addr=((const struct sockaddr_in*)p->ai_addr)->sin_addr;
 		break;
 	}
 
 	freeaddrinfo(res);
-	return mAddress.sin_addr != 0;
+	return mAddress.sin_addr.s_addr != 0;
 }
 
 void ClientAddress::SetResolvedAddress(const sockaddr_in &addr)

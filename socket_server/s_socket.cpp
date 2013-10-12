@@ -1,10 +1,6 @@
 #include "common.h"
 
-SSocket::SSocket(SocketFD socket) : mSocket(socket) {}
-
-SSocket::~SSocket() {}
-
-bool SSocket::CreateSocket(int type, unsigned short port)
+bool NetworkSocket::CreateSocket(int type, unsigned short port)
 {
 	struct addrinfo hints, *res, *p;
 	int status;
@@ -13,7 +9,7 @@ bool SSocket::CreateSocket(int type, unsigned short port)
 	hints.ai_socktype = type;
 	hints.ai_flags = AI_PASSIVE;
 	
-	if ((status = getaddrinfo(mUnresolvedHostString.c_str(), port, &hints, &res)) != 0)
+	if ((status = getaddrinfo(NULL, to_string(port).c_str(), &hints, &res)) != 0)
 	{	
 		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(status));
 		return false;
@@ -22,10 +18,11 @@ bool SSocket::CreateSocket(int type, unsigned short port)
 	for(p=res; p!=NULL; p=p->ai_next)
 	{
 		mSocket = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
-		if (listener < 0)  
+		if (mSocket < 0)  
 		    continue;
-
-		setsockopt(mSocket, SOL_SOCKET, SO_REUSEADDR, 1, sizeof(int));
+		
+		int yes=1;
+		setsockopt(mSocket, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
 	
 	 	if (bind(mSocket, p->ai_addr, p->ai_addrlen) < 0) 
 		{
@@ -40,45 +37,36 @@ bool SSocket::CreateSocket(int type, unsigned short port)
 		fprintf(stderr, "Failed to bind socket!\n");
 		return false;
 	}
-	SetupSocket();
+	//SetupSocket();
 	return true;
 }
 
-
-void SSocket::SetError(SocketError::eError err, const char *fname)
-{
-	mSocketError.mError=err;
-	mSocketError.mFunctionName=fname;
-	mSocketError.mErrorText=strerror(errno);
-	fprintf(stderr, "%s error: %s\n", mSocketError.mFunctionName.c_str(), mSocketError.mErrorText.c_str());
-}
-
-void SSocket::SetupSocket()
+void NetworkSocket::SetupSocket()
 {
 
 	int flags, s;
-	flags = fcntl(mSocket, F_FGETL, 0);
+	flags = fcntl(mSocket, F_GETFL, 0);
 	if(flags < 0)
 	{
-		SetError(SOCKET_OPTIONS_FAILED,"fcntl");
-		return false;
+		SetError(SocketError::SOCKET_OPTIONS_FAILED,"fcntl");
+		return;
 	}
 
 	flags |= O_NONBLOCK;
 	s = fcntl(mSocket, F_SETFL, flags);
-	if(f<0)
+	if(s<0)
 	{
-		SetError(SOCKET_OPTIONS_FAILED,"fcntl");
-		return false;
+		SetError(SocketError::SOCKET_OPTIONS_FAILED,"fcntl");
+		return;
 	}
 }
 
-void SSocket::Listen()
+void NetworkSocket::Listen()
 {
 	listen(mSocket,10);	
 }
 
-SSocket* SSocket::Accept(ClientAddress &addr)
+NetworkSocket* NetworkSocket::Accept()
 {
 	SocketFD in;
 	struct sockaddr_in client;
@@ -88,41 +76,42 @@ SSocket* SSocket::Accept(ClientAddress &addr)
 	
 	if(in==-1)
 	{
-		SetError(CONNECTION_ERROR,"accept");
+		SetError(SocketError::CONNECTION_ERROR,"accept");
 		return NULL;
 	}
 
-	addr.SetResolvedAddress(client);
-
-	// TODO: maybe create normal client?
-	SSocket *new_socket = new SSocket(in);
+	NetworkSocket *new_socket = new NetworkSocket(in);
 	return new_socket;
 }
 
-void SSocket::Connect(ClientAddress &addr)
+int NetworkSocket::Read(char *buffer, int buff_length)
+{
+	int nbytes=recv(mSocket, buffer, buff_length,0);
+
+	if(nbytes==-1)
+	{
+		SetError(SocketError::READ_ERROR_OCCURED,"recv");
+		return -1;
+	}
+	else if(nbytes==0)
+	{
+		fprintf(stderr, "Remote host closed the connection.\n");
+		return 0;
+	}	
+}
+
+int NetworkSocket::Write(const char *data, int length)
+{
+	int nbytes=send(mSocket, data, length, 0);
+
+}
+
+int NetworkSocket::ReadTo(char *buffer, int buff_length)
+{
+
+}
+int NetworkSocket::WriteTo(char *data, int length, ClientAddress &addr)
 {
 
 }
 
-int SSocket::Read(char *buffer, int buff_length)
-{
-
-}
-
-int SSocket::Write(const char *data, int length)
-{
-
-}
-int SSocket::ReadTo(char *buffer, int buff_length)
-{
-
-}
-int SSocket::WriteTo(char *data, int length, ClientAddress &addr)
-{
-
-}
-
-void SSocket::Close()
-{
-	close(mSocket);	
-}
