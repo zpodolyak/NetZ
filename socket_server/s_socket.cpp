@@ -37,7 +37,8 @@ bool NetworkSocket::CreateSocket(int type, unsigned short port)
 		fprintf(stderr, "Failed to bind socket!\n");
 		return false;
 	}
-	//SetupSocket();
+	if(mNonBlocking)
+		SetupSocket();
 	return true;
 }
 
@@ -66,7 +67,7 @@ void NetworkSocket::Listen()
 	listen(mSocket,10);	
 }
 
-NetworkSocket* NetworkSocket::Accept()
+NetworkSocket* NetworkSocket::Accept(ClientAddress &address)
 {
 	SocketFD in;
 	struct sockaddr_in client;
@@ -79,7 +80,8 @@ NetworkSocket* NetworkSocket::Accept()
 		SetError(SocketError::CONNECTION_ERROR,"accept");
 		return NULL;
 	}
-
+	
+	address.SetResolvedAddress(client);
 	NetworkSocket *new_socket = new NetworkSocket(in);
 	return new_socket;
 }

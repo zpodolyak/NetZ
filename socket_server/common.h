@@ -3,6 +3,7 @@
 
 // std includes
 #include <vector>
+#include <memory>
 #include <string>
 #include <cstring>
 #include <cstdio>
@@ -12,6 +13,7 @@
 // Platform includes
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/epoll.h>
 #include <unistd.h>
 #include <errno.h>
 #include <netdb.h>

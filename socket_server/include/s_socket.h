@@ -26,8 +26,8 @@ class ClientAddress;
 class NetworkSocket
 {
 public:
-	NetworkSocket(){}
-	NetworkSocket(SocketFD fd) : mSocket(fd) {}
+	NetworkSocket(bool non_blocking=true): mNonBlocking(non_blocking){}
+	NetworkSocket(SocketFD fd, bool non_blocking=true) : mSocket(fd), mNonBlocking(non_blocking) {}
 	~NetworkSocket(){}
 	
 	int Read(char *buffer, int buff_length);
@@ -35,7 +35,7 @@ public:
 	int ReadTo(char *buffer, int buff_length);
 	int WriteTo(char *data, int length, ClientAddress &addr);
 	void Listen();
-	NetworkSocket* Accept();
+	NetworkSocket* Accept(ClientAddress &address);
 	bool CreateSocket(int type, unsigned short port);
 	void Connect(ClientAddress &address);
 	
@@ -57,6 +57,7 @@ private:
 
 	SocketFD mSocket;
 	SocketError mSocketError;
+	bool mNonBlocking;
 };
 
 #endif
