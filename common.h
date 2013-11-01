@@ -9,6 +9,8 @@
 #include <cstdio>
 #include <cstdlib>
 #include <sstream>
+#include <functional>
+#include <algorithm>
 
 // Platform includes
 #include <sys/types.h>
@@ -23,7 +25,12 @@
 
 // Program includes
 #include "common/utils.h"
-#include "include/s_socket.h"
+#include "common/epoll_event.h"
+#include "common/reactor.h"
 #include "include/socket_address.h"
+#include "include/s_socket.h"
+#include "include/iconnection_handler.h"
+#include "include/socket_server.h"
+#include "include/game_connection.h"
 
 #endif

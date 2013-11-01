@@ -1,48 +1,6 @@
 #include "common.h"
 
-bool NetworkSocket::CreateSocket(int type, unsigned short port)
-{
-	struct addrinfo hints, *res, *p;
-	int status;
-	memset(&hints, 0, sizeof(hints));
-	hints.ai_family = AF_UNSPEC; 
-	hints.ai_socktype = type;
-	hints.ai_flags = AI_PASSIVE;
-	
-	if ((status = getaddrinfo(NULL, to_string(port).c_str(), &hints, &res)) != 0)
-	{	
-		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(status));
-		return false;
-	}
-	
-	for(p=res; p!=NULL; p=p->ai_next)
-	{
-		mSocket = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
-		if (mSocket < 0)  
-		    continue;
-		
-		int yes=1;
-		setsockopt(mSocket, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
-	
-	 	if (bind(mSocket, p->ai_addr, p->ai_addrlen) < 0) 
-		{
-		     	close(mSocket);
-			continue;
-		}
-		break;
-	}
-	freeaddrinfo(res);
-	if(p==NULL)
-	{
-		fprintf(stderr, "Failed to bind socket!\n");
-		return false;
-	}
-	if(mNonBlocking)
-		SetupSocket();
-	return true;
-}
-
-void NetworkSocket::SetupSocket()
+void NetworkSocket::SetupNonBlocking()
 {
 
 	int flags, s;
@@ -62,29 +20,12 @@ void NetworkSocket::SetupSocket()
 	}
 }
 
-void NetworkSocket::Listen()
+
+void NetworkSocket::OnSocketEvent()
 {
-	listen(mSocket,10);	
+
 }
 
-NetworkSocket* NetworkSocket::Accept(ClientAddress &address)
-{
-	SocketFD in;
-	struct sockaddr_in client;
-	socklen_t client_size = sizeof(sockaddr_in);
-
-	in=accept(mSocket,(struct sockaddr*)&client, &client_size);
-	
-	if(in==-1)
-	{
-		SetError(SocketError::CONNECTION_ERROR,"accept");
-		return NULL;
-	}
-	
-	address.SetResolvedAddress(client);
-	NetworkSocket *new_socket = new NetworkSocket(in);
-	return new_socket;
-}
 
 int NetworkSocket::Read(char *buffer, int buff_length)
 {
@@ -99,21 +40,27 @@ int NetworkSocket::Read(char *buffer, int buff_length)
 	{
 		fprintf(stderr, "Remote host closed the connection.\n");
 		return 0;
-	}	
+	}
+	return nbytes;	
 }
 
 int NetworkSocket::Write(const char *data, int length)
 {
-	int nbytes=send(mSocket, data, length, 0);
-
+	int nbytes=0;
+	if((nbytes=send(mSocket, data, length, 0))== -1)
+	{
+		SetError(SocketError::WRITE_ERROR_OCCURED,"send");
+		return -1;
+	}
+	return nbytes;
 }
 
 int NetworkSocket::ReadTo(char *buffer, int buff_length)
 {
-
+	return -1;
 }
 int NetworkSocket::WriteTo(char *data, int length, ClientAddress &addr)
 {
-
+	return -1;
 }
 
