@@ -23,7 +23,7 @@ void NetworkSocket::SetupNonBlocking()
 
 void NetworkSocket::OnSocketEvent()
 {
-
+	// handle your socket's event, probably through an IConnetionHandler instance
 }
 
 
@@ -57,10 +57,12 @@ int NetworkSocket::Write(const char *data, int length)
 
 int NetworkSocket::ReadTo(char *buffer, int buff_length)
 {
+	// TODO: handle UDP connections
 	return -1;
 }
 int NetworkSocket::WriteTo(char *data, int length, ClientAddress &addr)
 {
+	// TODO: handle UDP connections
 	return -1;
 }
 

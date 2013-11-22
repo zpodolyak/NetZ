@@ -14,7 +14,7 @@ public:
 		inet_ntop(c.sin_family, &c.sin_addr, s, sizeof(s));
 		printf("server: got connection from %s\n", s);
 
-		const char *reply = "My epoll shit just answered like a capo di tutti capi!";
+		const char *reply = "My epoll just answered this bad boy like a boss!";
 		size_t len = strlen(reply);
 		incoming->Write(reply, len);
 		incoming->Close();

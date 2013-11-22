@@ -6,7 +6,7 @@ int main()
 	SocketServer server(theReactor, new GameConnection, SOCK_STREAM, 3490);
 
 	server.Listen();
-	printf("Someone should connect to mah shit\n");
+	printf("Someone should connect to my incredibly dumb server\n");
 	
 	for(;;)
 	{
