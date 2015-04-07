@@ -9,12 +9,17 @@ add_definitions(-std=c++11
                 -g
                 -fPIC)
 
+if(CMAKE_SYSTEM_NAME MATCHES ".*Linux")
+      set(PLATFORM_DIR src/platform/linux/)
+      add_definitions(-DPLATFORM_LINUX)
+endif()
+
 set(SOURCES
-    common/epoll_reactor.cpp
-    s_socket.cpp
-    socket_address.cpp
-    socket_server.cpp
-    test.cpp)
+    ${PLATFORM_DIR}/reactor.cpp
+    src/s_socket.cpp
+    src/socket_address.cpp
+    src/socket_server.cpp
+    src/test.cpp)
 
 add_executable(test ${SOURCES})    
 

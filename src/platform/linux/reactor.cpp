@@ -1,4 +1,4 @@
-#include "../common.h"
+#include "common.h"
 
 epoll_event events[MAX_EVENTS];
 
