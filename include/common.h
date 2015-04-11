@@ -14,17 +14,25 @@
 
 // platform specific includes
 #ifdef PLATFORM_LINUX
-  #include <sys/types.h>
-  #include <sys/socket.h>
-  #include <sys/epoll.h>
-  #include <unistd.h>
-  #include <errno.h>
-  #include <netdb.h>
-  #include <arpa/inet.h>
-  #include <netinet/in.h>
-  #include <fcntl.h>
-  
-  #include "platform/linux/epoll_event.h"
+# include <linux/version.h>
+# if LINUX_VERSION_CODE >= KERNEL_VERSION(2,5,45)
+#   define HAS_EPOLL
+#   include <sys/epoll.h>
+# endif
+# include <sys/types.h>
+# include <sys/socket.h>
+# include <unistd.h>
+# include <errno.h>
+# include <netdb.h>
+# include <arpa/inet.h>
+# include <netinet/in.h>
+# include <fcntl.h>
+
+# if defined(HAS_EPOLL)
+#   include "platform/linux/epoll_event.h"
+# endif
+#else
+# error ERROR: currently only Linux is supported!
 #endif
 
 

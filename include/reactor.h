@@ -1,8 +1,6 @@
 #ifndef REACTOR_H
 #define REACTOR_H
 
-#define MAX_EVENTS	64
-
 class Reactor
 {
 	typedef std::function<void()> Listener;
@@ -25,7 +23,7 @@ public:
 	void RemoveEventHandler(Event &event);
 	bool DispatchEvents(int timeout=-1);
 private:
-	Event mOwnerEvent;
+	int epoll_fd;
 	typedef std::pair<Event*,Listener> EventHandler;
 	std::vector<EventHandler> mEventList;
 	size_t mTotalEvents;

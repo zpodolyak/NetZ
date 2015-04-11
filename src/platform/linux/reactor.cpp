@@ -1,21 +1,27 @@
 #include "common.h"
 
-epoll_event events[MAX_EVENTS];
-
 Reactor::Reactor()
-: mOwnerEvent(epoll_create1(0))
+#if defined(EPOLL_CLOEXEC)
+: epoll_fd(epoll_create1(EPOLL_CLOEXEC))
+#else
+: epoll_fd(-1)
+#endif
 , mTotalEvents(0)
 {
-	if(mOwnerEvent.mFd==-1)
+	if(epoll_fd == -1)
 	{
-		perror("epoll_create");
+    epoll_fd = epoll_create(20000);
+    if (epoll_fd != -1)
+      ::fcntl(epoll_fd, F_SETFD, FD_CLOEXEC);
+    else
+		  perror("epoll_create");
 	}
 }
 
 Reactor::~Reactor()
 {
 	std::vector<EventHandler>::iterator it=mEventList.begin(), itEnd=mEventList.end();
-	for(; it!=itEnd;)
+	for(; it!=itEnd;++it)
 	{
 		delete it->first;
 	}
@@ -23,7 +29,7 @@ Reactor::~Reactor()
 
 void Reactor::AddEventHandler(Event *event, const Listener &listener)
 {
-	if(epoll_ctl(mOwnerEvent.mFd, EPOLL_CTL_ADD, event->mFd, &event->mEvent)!=0)
+	if(epoll_ctl(epoll_fd, EPOLL_CTL_ADD, event->mFd, &event->mEvent)!=0)
 	{
 		perror("epoll_ctl");
 		return;
@@ -34,7 +40,7 @@ void Reactor::AddEventHandler(Event *event, const Listener &listener)
 
 void Reactor::RemoveEventHandler(Event &event)
 {
-	if(epoll_ctl(mOwnerEvent.mFd, EPOLL_CTL_DEL, event.mFd, &event.mEvent)!=0)
+	if(epoll_ctl(epoll_fd, EPOLL_CTL_DEL, event.mFd, &event.mEvent)!=0)
 	{
 		perror("epoll_ctl");
 		return;
@@ -61,7 +67,8 @@ void Reactor::RemoveEventHandler(Event &event)
 
 bool Reactor::DispatchEvents(int timeout)
 {
-	int n = epoll_wait(mOwnerEvent.mFd, events, MAX_EVENTS, timeout);
+  epoll_event events[128];
+	int n = epoll_wait(epoll_fd, events, 128, timeout);
 
 	if(!n) 
 		return false;
