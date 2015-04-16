@@ -1,12 +1,12 @@
 #include "common.h"
 
-ClientAddress::ClientAddress()
+Address::Address()
 : mIsResolved(false)
 {
 	memset(&mAddress,0,sizeof(sockaddr_in));
 }
 
-ClientAddress::ClientAddress(const std::string &host_string)
+Address::Address(const std::string &host_string)
 : mUnresolvedHostString(host_string)
 , mIsResolved(false)
 {
@@ -14,12 +14,12 @@ ClientAddress::ClientAddress(const std::string &host_string)
 	mIsResolved=ResolveHost();
 }
 
-void ClientAddress::SetPort(unsigned short port)
+void Address::SetPort(unsigned short port)
 {
 	mAddress.sin_port=htons(port);
 }
 
-void ClientAddress::SetHostString(const std::string &host_string, unsigned short port)
+void Address::SetHostString(const std::string &host_string, unsigned short port)
 {
 	mUnresolvedHostString=host_string;
 	if(port != -1)
@@ -27,7 +27,7 @@ void ClientAddress::SetHostString(const std::string &host_string, unsigned short
 	mIsResolved=ResolveHost();
 }
 
-bool ClientAddress::ResolveHost()
+bool Address::ResolveHost()
 {
 	std::string::size_type found=mUnresolvedHostString.find_first_of(":");
 	std::string port;
@@ -53,7 +53,7 @@ bool ClientAddress::ResolveHost()
 		return false;
 	}
 	
-	for(p=res; p!=NULL; p=p->ai_next)
+	for(p=res; p!=nullptr; p=p->ai_next)
 	{
 		if(p->ai_family!=AF_INET)
 			continue;
@@ -65,7 +65,7 @@ bool ClientAddress::ResolveHost()
 	return mAddress.sin_addr.s_addr != 0;
 }
 
-void ClientAddress::SetResolvedAddress(const sockaddr_in &addr)
+void Address::SetResolvedAddress(const sockaddr_in &addr)
 {
 	mAddress=addr;
 	mIsResolved=true;

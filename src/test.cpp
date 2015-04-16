@@ -3,10 +3,10 @@
 int main()
 {
 	Reactor theReactor;
-	SocketServer server(theReactor, new GameConnection, SOCK_STREAM, 3490);
+	Netz::Socket server(theReactor, SOCK_STREAM, 3490);
 
 	server.Listen();
-	printf("Someone should connect to my incredibly dumb server\n");
+	printf("waiting for connections...\n");
 	
 	for(;;)
 	{

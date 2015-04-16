@@ -3,7 +3,7 @@
 
 class Reactor
 {
-	typedef std::function<void()> Listener;
+	typedef std::function<void(int)> Listener;
 
 	struct EventHandlerComp
 	{

@@ -1,7 +1,7 @@
-#ifndef SOCKET_ADDRESS_H
-#define SOCKET_ADDRESS_H
+#ifndef ADDRESS_H
+#define ADDRESS_H
 
-class ClientAddress
+class Address
 {
 private:
 	bool  ResolveHost();
@@ -10,15 +10,14 @@ private:
 	bool mIsResolved;
 	sockaddr_in mAddress;
 public:
-	ClientAddress();
-	ClientAddress(const std::string &host_string);
-	~ClientAddress() {}
+	Address();
+	Address(const std::string &host_string);
+	~Address() {}
 
 	void SetPort(unsigned short port);
 	int GetPort() const { return mIsResolved ? mAddress.sin_port : -1; }
 	void SetHostString(const std::string &host_string, unsigned short port=-1);
 	std::string GetHostName() const { return mUnresolvedHostString; }	
-	const sockaddr_in& GetClientAddress() const { return mAddress; } // TODO: this seems wrong especially if it's unresolved
 	void SetResolvedAddress(const sockaddr_in &addr);
 };
 

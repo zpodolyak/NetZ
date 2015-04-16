@@ -11,6 +11,7 @@
 #include <sstream>
 #include <functional>
 #include <algorithm>
+#include <cassert>
 
 // platform specific includes
 #ifdef PLATFORM_LINUX
@@ -38,10 +39,7 @@
 
 #include "utils.h"
 #include "reactor.h"
-#include "socket_address.h"
-#include "s_socket.h"
-#include "iconnection_handler.h"
-#include "socket_server.h"
-#include "game_connection.h"
+#include "address.h"
+#include "socket.h"
 
 #endif

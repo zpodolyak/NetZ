@@ -14,7 +14,7 @@ Reactor::Reactor()
     if (epoll_fd != -1)
       ::fcntl(epoll_fd, F_SETFD, FD_CLOEXEC);
     else
-		  perror("epoll_create");
+		  PrintError("epoll_create error");
 	}
 }
 
@@ -31,7 +31,7 @@ void Reactor::AddEventHandler(Event *event, const Listener &listener)
 {
 	if(epoll_ctl(epoll_fd, EPOLL_CTL_ADD, event->mFd, &event->mEvent)!=0)
 	{
-		perror("epoll_ctl");
+		PrintError("epoll_ctl error");
 		return;
 	}	
 	mEventList.push_back(std::make_pair(event,listener));
@@ -42,7 +42,7 @@ void Reactor::RemoveEventHandler(Event &event)
 {
 	if(epoll_ctl(epoll_fd, EPOLL_CTL_DEL, event.mFd, &event.mEvent)!=0)
 	{
-		perror("epoll_ctl");
+	  PrintError("epoll_ctl error");
 		return;
 	}
 
@@ -64,7 +64,6 @@ void Reactor::RemoveEventHandler(Event &event)
 	--mTotalEvents;	
 }
 
-
 bool Reactor::DispatchEvents(int timeout)
 {
   epoll_event events[128];
@@ -79,7 +78,7 @@ bool Reactor::DispatchEvents(int timeout)
 		   (events[i].events & EPOLLHUP) ||
 		   !(events[i].events & EPOLLIN))
 		{
-			fprintf(stderr, "epoll error\n");
+		  PrintError("epoll error");
 			continue;
 		}
 		Event ev(events[i].data.fd);
@@ -88,7 +87,7 @@ bool Reactor::DispatchEvents(int timeout)
 		if(it != mEventList.end())
 		{
 			Listener lst = it->second;
-			lst();
+			lst(events[i].data.fd);
 		}
 	}
 	return true;

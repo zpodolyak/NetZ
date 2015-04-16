@@ -16,9 +16,8 @@ endif()
 
 set(SOURCES
     ${PLATFORM_DIR}/reactor.cpp
-    src/s_socket.cpp
-    src/socket_address.cpp
-    src/socket_server.cpp
+    src/address.cpp
+    src/socket.cpp
     src/test.cpp)
 
 add_executable(test ${SOURCES})    
