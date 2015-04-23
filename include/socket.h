@@ -16,9 +16,8 @@ namespace Netz
     int  ReadStream(char *buffer, int buff_length);
     int  WriteStream(const char *data, int length);
     void SetSocketOptions();
-  private:
     int CreateServerSocket();
-    
+  private: 
     Reactor &reactor;
     int serverType;
 
