@@ -7,10 +7,8 @@ using Socket = Netz::Socket;
 
 TEST(ContrivedExampleTest, CreateSocket)
 {
-  Reactor r;
-  Socket s(r, SOCK_STREAM, 1112);
-  int fd = s.CreateServerSocket();
-  EXPECT_NE(0, fd);
+  auto s = Socket::CreateServerSocket(SOCK_STREAM, 1112);
+  EXPECT_NE(0, s->socket);
 }
 
 int main(int argc, char** argv)
@@ -18,3 +16,6 @@ int main(int argc, char** argv)
   ::testing::InitGoogleMock(&argc, argv);
   return RUN_ALL_TESTS();
 }
+
+#include "../src/socket.cpp"
+#include "../src/address.cpp"

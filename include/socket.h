@@ -3,26 +3,26 @@
 
 namespace Netz
 {
-  class Socket
+  struct Socket
   {
   public:
-    Socket(Reactor &_reactor, int socket_type, unsigned short port);
+    enum Mode
+    {
+      Server,
+      Client
+    };
 
-    void OnIncomingConnection(int fd);
-    void OnSocketEvent(int fd);
+    void SetNonBlocking();
+    int Read(uint8_t *buffer, int length);
+    int Write(uint8_t *data, int length);
 
-    void Listen();
-    int  Accept(Address &client);
-    int  ReadStream(char *buffer, int buff_length);
-    int  WriteStream(const char *data, int length);
-    void SetSocketOptions();
-    int CreateServerSocket();
-  private: 
-    Reactor &reactor;
-    int serverType;
+    static std::shared_ptr<Socket> CreateServerSocket(int type, uint16_t port);
+    static std::shared_ptr<Socket> CreateClientSocket(int type, uint16_t port, const char* host);
 
-    unsigned short serverPort;
-    int socket_fd;
+    Mode m;
+    int socket;
+  private:
+    Socket(Mode mode);
   };
 }
 

@@ -1,6 +1,8 @@
 cmake_minimum_required (VERSION 2.8)
 project(netz)
 
+option(BUILD_TESTS "Build unit tests" OFF)
+
 include_directories(include)
 
 add_definitions(-std=c++11
@@ -10,9 +12,10 @@ add_definitions(-std=c++11
                 -fPIC)
 
 if(CMAKE_SYSTEM_NAME MATCHES ".*Linux")
-      set(PLATFORM_DIR src/platform/linux/)
-      set(THREAD_LIB pthread)
-      add_definitions(-DPLATFORM_LINUX)
+  set(PLATFORM_DIR src/platform/linux/)
+  set(THREAD_LIB pthread)
+  set(TEST_LIB ${CMAKE_SOURCE_DIR}/external/gmock/lib/libgmock.a)
+  add_definitions(-DPLATFORM_LINUX)
 else()
   message(FATAL_ERROR "Unsupported platform! Exiting.")
 endif()
@@ -26,5 +29,7 @@ add_library(netz STATIC ${LIB_SOURCES})
 
 add_executable(test_app src/test_app.cpp)
 target_link_libraries(test_app netz)
-    
-add_subdirectory(test)
+
+if(BUILD_TESTS)
+  add_subdirectory(test)
+endif()

@@ -1,72 +1,63 @@
 #include "common.h"
 
-Address::Address()
-: mIsResolved(false)
+namespace Netz
 {
-	memset(&mAddress,0,sizeof(sockaddr_in));
-}
+  Address::Address(const std::string& host_string)
+  : host(host_string)
+  {
+  }
 
-Address::Address(const std::string &host_string)
-: mUnresolvedHostString(host_string)
-, mIsResolved(false)
-{
-	memset(&mAddress,0,sizeof(sockaddr_in));
-	mIsResolved=ResolveHost();
-}
+  Address::Address(Address&& other)
+  : host(std::move(other.host))
+  {
+  }
 
-void Address::SetPort(unsigned short port)
-{
-	mAddress.sin_port=htons(port);
-}
+  bool Address::GetAddressInfo(int socket_type, const char* port, addrinfo** res)
+  {
+    addrinfo hints;
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_UNSPEC; 
+    hints.ai_socktype = socket_type;
+    
+    if(host.empty())
+      hints.ai_flags = AI_PASSIVE;
 
-void Address::SetHostString(const std::string &host_string, unsigned short port)
-{
-	mUnresolvedHostString=host_string;
-	if(port != -1)
-		SetPort(port);
-	mIsResolved=ResolveHost();
-}
+    if ((getaddrinfo((!host.empty()) ? host.c_str() : nullptr, port, &hints, res)) != 0) 	
+    {
+      PrintError("getaddrinfo");
+      return false;
+    }
+    return true;
+  }
 
-bool Address::ResolveHost()
-{
-	std::string::size_type found=mUnresolvedHostString.find_first_of(":");
-	std::string port;
+  Address Address::ResolveHost(const std::string & host_string)
+  {
+    Address addr{ host_string };
+    addr.ResolveHost();
+    return addr;
+  }
 
-	if(found!=std::string::npos && inet_pton(AF_INET,mUnresolvedHostString.substr(0,found).c_str(),&(mAddress.sin_addr)) > 0)
-	{
-		SetPort(atoi(mUnresolvedHostString.substr(found).c_str()));
-		port=mUnresolvedHostString.substr(found);	
-		return true;
-	}
+  std::string Address::ResolveHost()
+  {
+    std::string ipstr;
+    addrinfo *res = nullptr, *p = nullptr;
 
-	struct addrinfo hints, *res, *p;
-	int status;
-	memset(&hints, 0, sizeof(hints));
-	hints.ai_family = AF_UNSPEC; 
-	hints.ai_socktype = SOCK_STREAM;
-	hints.ai_flags = AI_CANONNAME;
-	port=to_string(mAddress.sin_port);
-
-	if ((status = getaddrinfo(mUnresolvedHostString.c_str(), port.c_str(), &hints, &res)) != 0) 
-	{	
-		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(status));
-		return false;
-	}
-	
-	for(p=res; p!=nullptr; p=p->ai_next)
-	{
-		if(p->ai_family!=AF_INET)
-			continue;
-		mAddress.sin_addr=((const struct sockaddr_in*)p->ai_addr)->sin_addr;
-		break;
-	}
-
-	freeaddrinfo(res);
-	return mAddress.sin_addr.s_addr != 0;
-}
-
-void Address::SetResolvedAddress(const sockaddr_in &addr)
-{
-	mAddress=addr;
-	mIsResolved=true;
+    if (GetAddressInfo(SOCK_STREAM, nullptr, &res))
+    {
+      struct in_addr addr;
+      for(p=res; p!=nullptr; p=p->ai_next)
+      {
+        if(p->ai_family!=AF_INET)
+          continue;
+        addr =((const struct sockaddr_in*)p->ai_addr)->sin_addr;
+        break;
+      }
+    
+      char str[128];
+      inet_ntop(p->ai_family, &addr, str, sizeof(ipstr));
+      ipstr = str;
+    }
+    freeaddrinfo(res);
+    return ipstr;
+  }
 }
