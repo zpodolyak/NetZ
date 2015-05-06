@@ -1,32 +1,38 @@
 #ifndef REACTOR_H
 #define REACTOR_H
 
-class Reactor
+namespace Netz
 {
-	typedef std::function<void(int)> Listener;
+#if defined(HAS_EPOLL)
+# include "linux/epoll_reactor.h"
+#else
+  class Reactor
+  {
+    typedef std::function<void(int)> Listener;
 
-	struct EventHandlerComp
-	{
-		EventHandlerComp(const Event &e) : ev(e) {}
+    struct EventHandlerComp
+    {
+      EventHandlerComp(const Event &e) : ev(e) {}
 
-		bool operator()(const std::pair<Event*,Listener> &pr)
-		{
-			return pr.first->mFd==ev.mFd;
-		}
-		Event ev;
-	};
-public:
-	Reactor();
-	~Reactor();
+      bool operator()(const std::pair<Event*,Listener> &pr)
+      {
+        return pr.first->mFd==ev.mFd;
+      }
+      Event ev;
+    };
+  public:
+    Reactor();
+    ~Reactor();
 
-	void AddEventHandler(Event *event, const  Listener &listener);
-	void RemoveEventHandler(Event &event);
-	bool DispatchEvents(int timeout=-1);
-private:
-	int epoll_fd;
-	typedef std::pair<Event*,Listener> EventHandler;
-	std::vector<EventHandler> mEventList;
-	size_t mTotalEvents;
-};
-
+    void AddEventHandler(Event *event, const Listener &listener);
+    void RemoveEventHandler(Event &event);
+    bool DispatchEvents(int timeout);
+  private:
+    int reactorFD;
+    typedef std::pair<Event*,Listener> EventHandler;
+    std::vector<EventHandler> eventList;
+    uint32_t eventCount;
+  };
+#endif
+}
 #endif

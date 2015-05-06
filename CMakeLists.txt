@@ -11,19 +11,17 @@ add_definitions(-std=c++11
                 -g
                 -fPIC)
 
+file(GLOB LIB_SOURCES "${CMAKE_SOURCE_DIR}/src/*.cpp")
+
 if(CMAKE_SYSTEM_NAME MATCHES ".*Linux")
-  set(PLATFORM_DIR src/platform/linux/)
+  set(PLATFORM_DIR src/linux/)
   set(THREAD_LIB pthread)
   set(TEST_LIB ${CMAKE_SOURCE_DIR}/external/gmock/lib/libgmock.a)
+  list(APPEND LIB_SOURCES ${PLATFORM_DIR}/epoll_reactor.cpp)
   add_definitions(-DPLATFORM_LINUX)
 else()
   message(FATAL_ERROR "Unsupported platform! Exiting.")
 endif()
-
-set(LIB_SOURCES
-    ${PLATFORM_DIR}/reactor.cpp
-    src/address.cpp
-    src/socket.cpp)
 
 add_library(netz STATIC ${LIB_SOURCES})
 

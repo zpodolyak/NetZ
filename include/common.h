@@ -28,10 +28,6 @@
 # include <arpa/inet.h>
 # include <netinet/in.h>
 # include <fcntl.h>
-
-#if defined(HAS_EPOLL)
-# include "platform/linux/epoll_event.h"
-# endif
 #else
 # error ERROR: currently only Linux is supported!
 #endif
