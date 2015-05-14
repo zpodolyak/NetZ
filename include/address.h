@@ -7,8 +7,7 @@ namespace Netz
 
   struct Address
   {
-    Address(const std::string& host_string);
-    Address(Address&& other);
+    Address(std::string host_string);
 
     static Address ResolveHost(const std::string& host_string);
 

@@ -12,6 +12,7 @@
 #include <functional>
 #include <algorithm>
 #include <cassert>
+#include <unordered_map>
 
 // platform specific includes
 #ifdef PLATFORM_LINUX

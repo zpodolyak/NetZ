@@ -85,31 +85,4 @@ namespace Netz
       PrintError("fcntl failed");
   }
 
-  int Socket::Read(uint8_t *buffer, int length)
-  {
-    int nbytes = ::recv(socket, buffer, length,0);
-
-    if(nbytes==-1)
-    {
-      PrintError("recv read error");
-      return -1;
-    }
-    else if(nbytes==0)
-    {
-      PrintError("Remote host closed the connection.");
-      return 0;
-    }
-    return nbytes;	
-  }
-
-  int Socket::Write(uint8_t *data, int length)
-  {
-    int nbytes=0;
-    if((nbytes = ::send(socket, data, length, 0))== -1)
-    {
-      PrintError("send error");
-      return -1;
-    }
-    return nbytes;
-  }
 }

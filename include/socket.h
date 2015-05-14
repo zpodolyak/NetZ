@@ -3,7 +3,9 @@
 
 namespace Netz
 {
-  struct Socket
+  typedef struct sockaddr_storage sockaddr_storage;
+
+  class Socket
   {
   public:
     enum Mode
@@ -13,8 +15,18 @@ namespace Netz
     };
 
     void SetNonBlocking();
-    int Read(uint8_t *buffer, int length);
-    int Write(uint8_t *data, int length);
+
+    template<typename Protocol>
+    int Read(const Protocol& prot, uint8_t *buffer, int length)
+    {
+      return prot.Read(buffer, length);
+    }
+
+    template<typename Protocol>
+    int Write(const Protocol& prot, uint8_t *data, int length)
+    {
+      return prot.Write(data, length);
+    }
 
     static std::shared_ptr<Socket> CreateServerSocket(int type, uint16_t port);
     static std::shared_ptr<Socket> CreateClientSocket(int type, uint16_t port, const char* host);

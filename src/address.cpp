@@ -2,13 +2,8 @@
 
 namespace Netz
 {
-  Address::Address(const std::string& host_string)
-  : host(host_string)
-  {
-  }
-
-  Address::Address(Address&& other)
-  : host(std::move(other.host))
+  Address::Address(std::string host_string)
+  : host(std::move(host_string))
   {
   }
 

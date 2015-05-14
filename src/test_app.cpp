@@ -8,10 +8,10 @@ int main(int argc, char* argv[])
 
     if(s)
     {
-      printf("connected to server at %s\n", argv[1]);
+      DebugMessage("connected to server at %s", argv[1]);
     }
     else
-      printf("could not obtain socket! Exiting...\n");
+      DebugMessage("could not obtain socket! Exiting...");
   }
   else
   {
@@ -21,7 +21,7 @@ int main(int argc, char* argv[])
     if(s)
     {
       ::listen(s->socket, 10);
-      printf("waiting for connections...\n");
+      DebugMessage("waiting for connections...");
       
       // bypass the Reactor for now
       for(;;)
@@ -33,13 +33,13 @@ int main(int argc, char* argv[])
           PrintError("accept");
           continue;
         }           
-        printf("received new connection!\n");
+        DebugMessage("received new connection!");
         ::close(in);
         break;                              
       }
     }
     else
-      printf("could not obtain socket! Exiting...\n");
+      DebugMessage("could not obtain socket! Exiting...");
  }
 
 	return 0;
