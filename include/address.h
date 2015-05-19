@@ -4,18 +4,24 @@
 namespace Netz
 {
   typedef struct addrinfo addrinfo;
+  typedef struct in_addr ipv4_addr;
 
-  struct Address
+  struct AddressV4
   {
-    Address(std::string host_string);
+    AddressV4()
+    {
+      address.s_addr = 0;
+    }
 
-    static Address ResolveHost(const std::string& host_string);
+    static AddressV4 FromString(const char* ipaddress);
+    static bool ResolveFromHostname(const char* hostname, int socket_type, const char* port, addrinfo** res);
 
-    bool GetAddressInfo(int socket_type, const char* port, addrinfo** res);
-    std::string ResolveHost();
+    std::string ToString() const;
 
-    std::string host;
+    ipv4_addr address;
   };
+
+  typedef AddressV4 Address;
 }
 
 #endif

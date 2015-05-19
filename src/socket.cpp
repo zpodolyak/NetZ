@@ -2,18 +2,16 @@
 
 namespace Netz
 {
-  Socket::Socket(Mode mode)
-  : m(mode)
+  Socket::Socket()
   {
   }
 
   std::shared_ptr<Socket> Socket::CreateServerSocket(int type, uint16_t port)
   {
-    std::shared_ptr<Socket> s(new Socket(Mode::Server));
+    std::shared_ptr<Socket> s(new Socket());
     addrinfo *res = nullptr, *p = nullptr;
-    Address addr{ std::string() };
     
-    if (addr.GetAddressInfo(type, std::to_string(port).c_str(), &res))
+    if (Address::ResolveFromHostname(nullptr, type, std::to_string(port).c_str(), &res))
     {
       for (p=res; p; p=p->ai_next)
       {
@@ -22,16 +20,16 @@ namespace Netz
             continue;
         
         int yes=1;
-        setsockopt(s->socket, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
+        ::setsockopt(s->socket, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
       
-        if (bind(s->socket, p->ai_addr, p->ai_addrlen) < 0) 
+        if (::bind(s->socket, p->ai_addr, p->ai_addrlen) < 0) 
         {
           ::close(s->socket);
           continue;
         }
         break;
       }
-      freeaddrinfo(res);
+      ::freeaddrinfo(res);
       if(!p)
       {
         fprintf(stderr, "failed to bind socket!\n");
@@ -45,18 +43,17 @@ namespace Netz
 
   std::shared_ptr<Socket> Socket::CreateClientSocket(int type, uint16_t port, const char* host)
   {
-    std::shared_ptr<Socket> s(new Socket(Mode::Client));
+    std::shared_ptr<Socket> s(new Socket());
     addrinfo *res = nullptr, *p = nullptr;
-    Address addr{ host };
     
-    if (addr.GetAddressInfo(type, std::to_string(port).c_str(), &res))
+    if (Address::ResolveFromHostname(host, type, std::to_string(port).c_str(), &res))
     {
       for (p=res; p; p=p->ai_next)
       {
         if ((s->socket = ::socket(p->ai_family, p->ai_socktype, p->ai_protocol)) < 0)
           continue;
         
-        if((connect(s->socket, p->ai_addr, p->ai_addrlen)) < 0)
+        if((::connect(s->socket, p->ai_addr, p->ai_addrlen)) < 0)
         {
           PrintError("connect() error");
           ::close(s->socket);
@@ -64,7 +61,7 @@ namespace Netz
         }
         break;
       }
-      freeaddrinfo(res);
+      ::freeaddrinfo(res);
       if(!p)
       {
         fprintf(stderr, "failed to connect to server\n");
@@ -79,9 +76,9 @@ namespace Netz
 
   void Socket::SetNonBlocking()
   {
-    int flags = fcntl(socket, F_GETFL, 0);
+    int flags = ::fcntl(socket, F_GETFL, 0);
 
-    if (flags < 0 || fcntl(socket, F_SETFL, flags | O_NONBLOCK) < 0)
+    if (flags < 0 || ::fcntl(socket, F_SETFL, flags | O_NONBLOCK) < 0)
       PrintError("fcntl failed");
   }
 
