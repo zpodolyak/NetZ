@@ -29,6 +29,11 @@
 # include <arpa/inet.h>
 # include <netinet/in.h>
 # include <fcntl.h>
+
+// common types
+typedef int SocketHandle;
+# define INVALID_SOCKET -1
+# define SOCKET_ERROR -1
 #else
 # error ERROR: currently only Linux is supported!
 #endif
@@ -37,6 +42,7 @@
 #include "utils.h"
 #include "reactor.h"
 #include "address.h"
+#include "protocol.h"
 #include "socket.h"
 
 #endif

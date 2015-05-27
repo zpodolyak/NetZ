@@ -2,11 +2,10 @@
 
 int main(int argc, char* argv[])
 {
+  SocketHandle s;
   if(argc == 3)
   {
-    auto s = Netz::Socket::CreateClientSocket(SOCK_STREAM, 1112, argv[1]);
-
-    if(s)
+    if((s = Netz::Socket::CreateClientSocket(SOCK_STREAM, std::stoi(argv[2]), argv[1])) != INVALID_SOCKET)
     {
       DebugMessage("connected to server at %s", argv[1]);
     }
@@ -16,18 +15,15 @@ int main(int argc, char* argv[])
   else
   {
     struct sockaddr_storage addr;
-    auto s = Netz::Socket::CreateServerSocket(SOCK_STREAM, 1112);
-
-    if(s)
+    if((s = Netz::Socket::CreateServerSocket(SOCK_STREAM, 1112)) != INVALID_SOCKET)
     {
-      ::listen(s->socket, 10);
       DebugMessage("waiting for connections...");
       
       // bypass the Reactor for now
       for(;;)
       {
         size_t sockLen = sizeof(sockaddr_storage);
-        int in = ::accept(s->socket, (struct sockaddr *)&addr, &sockLen);
+        int in = ::accept(s, (struct sockaddr *)&addr, &sockLen);
         if (in == -1) 
         {
           PrintError("accept");

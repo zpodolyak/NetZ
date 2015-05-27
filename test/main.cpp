@@ -8,7 +8,7 @@ using Socket = Netz::Socket;
 TEST(ContrivedExampleTest, CreateSocket)
 {
   auto s = Socket::CreateServerSocket(SOCK_STREAM, 1112);
-  EXPECT_NE(0, s->socket);
+  EXPECT_NE(INVALID_SOCKET, s);
 }
 
 int main(int argc, char** argv)

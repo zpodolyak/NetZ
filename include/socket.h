@@ -3,20 +3,23 @@
 
 namespace Netz
 {
+  struct ProtocolData;
+    
   class Socket
   {
   public:
     Socket(const Socket&) = delete;
     Socket& operator=(const Socket&) = delete;
 
-    void SetNonBlocking();
+    void SetNonBlocking(SocketHandle socket);
 
-    static std::shared_ptr<Socket> CreateServerSocket(int type, uint16_t port);
-    static std::shared_ptr<Socket> CreateClientSocket(int type, uint16_t port, const char* host);
+    static SocketHandle CreateServerSocket(int type, uint16_t port);
+    static SocketHandle CreateClientSocket(int type, uint16_t port, const char* host);
 
-    int socket;
-  private:
     Socket();
+    Socket(const ProtocolData& prot);
+
+    SocketHandle Open(const ProtocolData& prot);
   };
 }
 

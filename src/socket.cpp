@@ -6,25 +6,41 @@ namespace Netz
   {
   }
 
-  std::shared_ptr<Socket> Socket::CreateServerSocket(int type, uint16_t port)
+  Socket::Socket(const ProtocolData& prot)
   {
-    std::shared_ptr<Socket> s(new Socket());
+    Open(prot);
+  }
+
+  SocketHandle Socket::Open(const ProtocolData& prot)
+  {
+    SocketHandle s = ::socket(prot.family, prot.type, prot.protocol);
+    if(s < 0)
+    {
+      PrintError("Socket::Open");
+      return INVALID_SOCKET;
+    }
+    return s;
+  }
+
+  SocketHandle Socket::CreateServerSocket(int type, uint16_t port)
+  {
+    SocketHandle sockfd;
     addrinfo *res = nullptr, *p = nullptr;
     
     if (Address::ResolveFromHostname(nullptr, type, std::to_string(port).c_str(), &res))
     {
       for (p=res; p; p=p->ai_next)
       {
-        s->socket = ::socket(p->ai_family, p->ai_socktype, p->ai_protocol);
-        if (s->socket < 0)  
+        sockfd = ::socket(p->ai_family, p->ai_socktype, p->ai_protocol);
+        if (sockfd < 0)  
             continue;
         
         int yes=1;
-        ::setsockopt(s->socket, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
+        ::setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
       
-        if (::bind(s->socket, p->ai_addr, p->ai_addrlen) < 0) 
+        if (::bind(sockfd, p->ai_addr, p->ai_addrlen) < 0) 
         {
-          ::close(s->socket);
+          ::close(sockfd);
           continue;
         }
         break;
@@ -32,31 +48,33 @@ namespace Netz
       ::freeaddrinfo(res);
       if(!p)
       {
-        fprintf(stderr, "failed to bind socket!\n");
-        s.reset();
+        PrintError("failed to bind socket!");
+        return INVALID_SOCKET;
       }
     }
     else
-      s.reset();
-    return s;
+      return INVALID_SOCKET;
+    
+    ::listen(sockfd, 10);
+    return sockfd;
   }
 
-  std::shared_ptr<Socket> Socket::CreateClientSocket(int type, uint16_t port, const char* host)
+  SocketHandle Socket::CreateClientSocket(int type, uint16_t port, const char* host)
   {
-    std::shared_ptr<Socket> s(new Socket());
     addrinfo *res = nullptr, *p = nullptr;
+    SocketHandle sockfd;
     
     if (Address::ResolveFromHostname(host, type, std::to_string(port).c_str(), &res))
     {
       for (p=res; p; p=p->ai_next)
       {
-        if ((s->socket = ::socket(p->ai_family, p->ai_socktype, p->ai_protocol)) < 0)
+        if ((sockfd = ::socket(p->ai_family, p->ai_socktype, p->ai_protocol)) < 0)
           continue;
         
-        if((::connect(s->socket, p->ai_addr, p->ai_addrlen)) < 0)
+        if((::connect(sockfd, p->ai_addr, p->ai_addrlen)) < 0)
         {
           PrintError("connect() error");
-          ::close(s->socket);
+          ::close(sockfd);
           continue;
         }
         break;
@@ -64,17 +82,16 @@ namespace Netz
       ::freeaddrinfo(res);
       if(!p)
       {
-        fprintf(stderr, "failed to connect to server\n");
-        s.reset();
+        PrintError("failed to connect to server");
+        return INVALID_SOCKET;
       }
     }
     else
-      s.reset();
-    
-    return s;
+      return INVALID_SOCKET;
+    return sockfd;
   }
 
-  void Socket::SetNonBlocking()
+  void Socket::SetNonBlocking(SocketHandle socket)
   {
     int flags = ::fcntl(socket, F_GETFL, 0);
 
