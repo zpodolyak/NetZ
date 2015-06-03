@@ -43,6 +43,9 @@ typedef int SocketHandle;
 #include "reactor.h"
 #include "address.h"
 #include "protocol.h"
+#include "connection_data.h"
+#include "socket_platform.h"
 #include "socket.h"
+#include "stream_socket.h"
 
 #endif

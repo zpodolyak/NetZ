@@ -2,101 +2,76 @@
 
 namespace Netz
 {
-  Socket::Socket()
+  SocketBase::SocketBase()
+  : socket(INVALID_SOCKET)
   {
   }
 
-  Socket::Socket(const ProtocolData& prot)
+  SocketBase::SocketBase(const ProtocolData& prot)
+  : socket(INVALID_SOCKET)
   {
     Open(prot);
   }
 
-  SocketHandle Socket::Open(const ProtocolData& prot)
+  void SocketBase::Open(const ProtocolData& prot)
   {
-    SocketHandle s = ::socket(prot.family, prot.type, prot.protocol);
-    if(s < 0)
-    {
-      PrintError("Socket::Open");
-      return INVALID_SOCKET;
-    }
-    return s;
+    socket = ::socket(prot.family, prot.type, prot.protocol);
+    if(socket == INVALID_SOCKET)
+      PrintError("SocketBase::Open");
   }
 
-  SocketHandle Socket::CreateServerSocket(int type, uint16_t port)
+  void SocketBase::Bind(const ConnectionData& conn)
   {
-    SocketHandle sockfd;
-    addrinfo *res = nullptr, *p = nullptr;
+    if(socket == INVALID_SOCKET)
+      PrintError("SocketBase::Bind");
     
-    if (Address::ResolveFromHostname(nullptr, type, std::to_string(port).c_str(), &res))
-    {
-      for (p=res; p; p=p->ai_next)
-      {
-        sockfd = ::socket(p->ai_family, p->ai_socktype, p->ai_protocol);
-        if (sockfd < 0)  
-            continue;
-        
-        int yes=1;
-        ::setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
-      
-        if (::bind(sockfd, p->ai_addr, p->ai_addrlen) < 0) 
-        {
-          ::close(sockfd);
-          continue;
-        }
-        break;
-      }
-      ::freeaddrinfo(res);
-      if(!p)
-      {
-        PrintError("failed to bind socket!");
-        return INVALID_SOCKET;
-      }
-    }
-    else
-      return INVALID_SOCKET;
-    
-    ::listen(sockfd, 10);
-    return sockfd;
+    if (::bind(socket, (sockaddr*)&conn.data, sizeof(sockaddr_in)) < 0)
+      PrintError("SocketBase::Bind"); 
   }
 
-  SocketHandle Socket::CreateClientSocket(int type, uint16_t port, const char* host)
+  void SocketBase::Connect(const ConnectionData& conn)
   {
-    addrinfo *res = nullptr, *p = nullptr;
-    SocketHandle sockfd;
-    
-    if (Address::ResolveFromHostname(host, type, std::to_string(port).c_str(), &res))
-    {
-      for (p=res; p; p=p->ai_next)
-      {
-        if ((sockfd = ::socket(p->ai_family, p->ai_socktype, p->ai_protocol)) < 0)
-          continue;
-        
-        if((::connect(sockfd, p->ai_addr, p->ai_addrlen)) < 0)
-        {
-          PrintError("connect() error");
-          ::close(sockfd);
-          continue;
-        }
-        break;
-      }
-      ::freeaddrinfo(res);
-      if(!p)
-      {
-        PrintError("failed to connect to server");
-        return INVALID_SOCKET;
-      }
-    }
-    else
-      return INVALID_SOCKET;
-    return sockfd;
   }
 
-  void Socket::SetNonBlocking(SocketHandle socket)
+  void SocketBase::Close()
   {
-    int flags = ::fcntl(socket, F_GETFL, 0);
-
-    if (flags < 0 || ::fcntl(socket, F_SETFL, flags | O_NONBLOCK) < 0)
-      PrintError("fcntl failed");
+    SocketPlatform::Close(socket);
+    socket = INVALID_SOCKET;
   }
 
+  void SocketBase::GetSocketOption(SocketOption& opt) const
+  {
+  }
+
+  void SocketBase::SetSocketOption(const SocketOption& opt)
+  {
+  }
+
+  ConnectionData SocketBase::LocalConnection() const
+  {
+    ConnectionData cd;
+    int len = int(cd.Size());
+    if (::getsockname(socket, (sockaddr*)&cd.data, (socklen_t*)&len))
+      PrintError("SocketBase::LocalConnection");
+    return cd;
+  }
+  
+  ConnectionData SocketBase::RemoteConnection() const
+  {
+    ConnectionData cd;
+    int len = int(cd.Size());
+    if (::getpeername(socket, (sockaddr*)&cd.data, (socklen_t*)&len))
+      PrintError("SocketBase::RemoteConnection");
+    return cd;
+  }
+
+  bool SocketBase::IsNonBlocking() const
+  {
+    return false;
+  }
+
+  void SocketBase::SetNonBlocking(bool mode)
+  {
+    SocketPlatform::SetNonBlocking(socket, mode);
+  }
 }

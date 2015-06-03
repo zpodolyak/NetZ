@@ -22,11 +22,18 @@ namespace Netz
 
   AddressV4 AddressV4::FromString(const char* hostname)
   {
-    return AddressV4(); // TODO
+    AddressV4 tmp;
+    if (SocketPlatform::inet_pton(AF_INET, hostname, &tmp.address) < 0)
+      return AddressV4();
+    return tmp;
   }
 
   std::string AddressV4::ToString() const
   {
-    return std::string(); // TODO
+    char addr_str[128];
+    const char* addr = SocketPlatform::inet_ntop(AF_INET, &address, addr_str, sizeof(addr_str));
+    if (!addr)
+      return std::string();
+    return addr;
   }
 }

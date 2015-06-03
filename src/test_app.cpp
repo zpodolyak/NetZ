@@ -5,7 +5,7 @@ int main(int argc, char* argv[])
   SocketHandle s;
   if(argc == 3)
   {
-    if((s = Netz::Socket::CreateClientSocket(SOCK_STREAM, std::stoi(argv[2]), argv[1])) != INVALID_SOCKET)
+    if((s = Netz::TcpSocket::CreateClientSocket(std::stoi(argv[2]), argv[1])) != INVALID_SOCKET)
     {
       DebugMessage("connected to server at %s", argv[1]);
     }
@@ -15,7 +15,7 @@ int main(int argc, char* argv[])
   else
   {
     struct sockaddr_storage addr;
-    if((s = Netz::Socket::CreateServerSocket(SOCK_STREAM, 1112)) != INVALID_SOCKET)
+    if((s = Netz::TcpSocket::CreateServerSocket(1112)) != INVALID_SOCKET)
     {
       DebugMessage("waiting for connections...");
       

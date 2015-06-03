@@ -4,22 +4,34 @@
 namespace Netz
 {
   struct ProtocolData;
-    
-  class Socket
+  class SocketOption;
+   
+  class SocketBase
   {
   public:
-    Socket(const Socket&) = delete;
-    Socket& operator=(const Socket&) = delete;
+    SocketBase(const SocketBase&) = delete;
+    SocketBase& operator=(const SocketBase&) = delete;
 
-    void SetNonBlocking(SocketHandle socket);
+    SocketBase();
+    SocketBase(const ProtocolData& prot);
 
-    static SocketHandle CreateServerSocket(int type, uint16_t port);
-    static SocketHandle CreateClientSocket(int type, uint16_t port, const char* host);
+    void Open(const ProtocolData& prot);
+    void Bind(const ConnectionData& conn);
+    void Connect(const ConnectionData& conn);
+    void Close();
 
-    Socket();
-    Socket(const ProtocolData& prot);
+    void GetSocketOption(SocketOption& opt) const;
+    void SetSocketOption(const SocketOption& opt);
 
-    SocketHandle Open(const ProtocolData& prot);
+    ConnectionData LocalConnection() const;
+    ConnectionData RemoteConnection() const;
+
+    bool IsNonBlocking() const;
+    void SetNonBlocking(bool mode);
+  protected:
+    ~SocketBase() {}
+
+    SocketHandle socket;
   };
 }
 

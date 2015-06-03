@@ -13,7 +13,7 @@ add_definitions(-std=c++11
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
 
-file(GLOB LIB_SOURCES "${CMAKE_SOURCE_DIR}/src/*.cpp")
+file(GLOB_RECURSE LIB_SOURCES "${CMAKE_SOURCE_DIR}/src/*.cpp")
 
 if(CMAKE_SYSTEM_NAME MATCHES ".*Linux")
   set(PLATFORM_DIR src/linux/)
