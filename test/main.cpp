@@ -7,7 +7,7 @@ using Socket = Netz::TcpSocket;
 
 TEST(ContrivedExampleTest, CreateSocket)
 {
-  auto s = Socket::CreateServerSocket(1112);
+  auto s = Socket::CreateServerSocket<Netz::ProtocolData<Netz::Protocol::TCP>>(1112);
   EXPECT_NE(INVALID_SOCKET, s);
 }
 
@@ -18,4 +18,8 @@ int main(int argc, char** argv)
 }
 
 #include "../src/socket.cpp"
+#include "../src/connection_data.cpp"
 #include "../src/address.cpp"
+#ifdef PLATFORM_LINUX
+# include "../src/linux/socket_linux.cpp"
+#endif

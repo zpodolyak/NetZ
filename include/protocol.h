@@ -8,17 +8,14 @@ namespace Netz
     UDP,
     TCP
   };
-
-  struct ProtocolData
+  
+  template <Protocol pr>
+  class ProtocolData
   {
-    ProtocolData(int _fam = AF_INET, int _type = SOCK_STREAM, int _prot = IPPROTO_TCP)
-     : family(_fam), type(_type), protocol(_prot) 
+  public:
+    ProtocolData()
     {
-    }
-
-    ProtocolData(Protocol prot)
-    {
-      switch(prot)
+      switch(pr)
       {
         case Protocol::TCP:
         {

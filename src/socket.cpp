@@ -7,19 +7,6 @@ namespace Netz
   {
   }
 
-  SocketBase::SocketBase(const ProtocolData& prot)
-  : socket(INVALID_SOCKET)
-  {
-    Open(prot);
-  }
-
-  void SocketBase::Open(const ProtocolData& prot)
-  {
-    socket = ::socket(prot.family, prot.type, prot.protocol);
-    if(socket == INVALID_SOCKET)
-      PrintError("SocketBase::Open");
-  }
-
   void SocketBase::Bind(const ConnectionData& conn)
   {
     if(socket == INVALID_SOCKET)
