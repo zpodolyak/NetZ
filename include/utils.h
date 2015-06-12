@@ -6,6 +6,12 @@ inline void PrintError(const char *message)
   fprintf(stderr, "%s error: %s\n", std::strerror(errno), message);
 }
 
+inline int ErrorWrapper(int return_value, std::error_code& ec)
+{
+  ec = std::error_code(errno, std::system_category());
+  return return_value;
+}
+
 inline void DebugMessage(const char* format, ...)
 {
 #ifdef DEBUG

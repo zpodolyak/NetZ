@@ -13,6 +13,7 @@
 #include <algorithm>
 #include <cassert>
 #include <unordered_map>
+#include <system_error>
 
 // platform specific includes
 #ifdef PLATFORM_LINUX

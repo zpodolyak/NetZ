@@ -28,7 +28,7 @@ namespace Netz
     }
 
     void Bind(const ConnectionData& conn);
-    void Connect(const ConnectionData& conn);
+    int  Connect(const ConnectionData& conn);
     void Close();
 
     void GetSocketOption(SocketOption& opt) const;

@@ -10,14 +10,21 @@ namespace Netz
   void SocketBase::Bind(const ConnectionData& conn)
   {
     if(socket == INVALID_SOCKET)
-      PrintError("SocketBase::Bind");
+      return;
     
     if (::bind(socket, (sockaddr*)&conn.data, sizeof(sockaddr_in)) < 0)
       PrintError("SocketBase::Bind"); 
   }
 
-  void SocketBase::Connect(const ConnectionData& conn)
+  int SocketBase::Connect(const ConnectionData& conn)
   {
+    std::error_code ec;
+    const sockaddr_in *socketAddress = &conn.data;
+
+    if (socket == INVALID_SOCKET || !socketAddress)
+      return SOCKET_ERROR;
+          
+    return ErrorWrapper(::connect(socket,(const sockaddr*)socketAddress, sizeof(sockaddr_in)), ec); 
   }
 
   void SocketBase::Close()
