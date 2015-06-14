@@ -8,9 +8,19 @@ namespace Netz
   template <typename ProtocolType>
   class StreamSocket : public SocketBase
   {
-    typedef ProtocolType procotol_type;
+    typedef ProtocolType protocol_type;
 
   public:
+    StreamSocket()
+     : SocketBase()
+    {
+    }
+
+    StreamSocket(const protocol_type& prot)
+      : SocketBase(prot)
+    {
+    }
+
     int Send(const char* buffer, int length)
     {
       std::error_code ec;
@@ -32,7 +42,7 @@ namespace Netz
     }
   };
 
-  using TcpSocket = StreamSocket<ProtocolData<Protocol::TCP>>;
+  using TcpSocket = StreamSocket<Tcp>;
 
 }
 

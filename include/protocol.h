@@ -41,6 +41,9 @@ namespace Netz
     int protocol;
   };
 
+  using Tcp = ProtocolData<Protocol::TCP>;
+  using Udp = ProtocolData<Protocol::UDP>;
+
 }
 
 #endif

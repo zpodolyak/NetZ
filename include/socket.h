@@ -20,13 +20,19 @@ namespace Netz
     }
 
     template <typename ProtocolType>
-    void Open(const ProtocolType& prot)
+    bool Open(const ProtocolType& prot)
     {
-      socket = ::socket(prot.family, prot.type, prot.protocol);
+      std::error_code ec;
+      socket = ErrorWrapper(::socket(prot.family, prot.type, prot.protocol), ec);
       if(socket == INVALID_SOCKET)
-        PrintError("SocketBase::Open");
+      {
+        PrintError(ec);
+        return false;
+      }
+      return true;
     }
-
+    
+    bool IsOpen() const;
     void Bind(const ConnectionData& conn);
     int  Connect(const ConnectionData& conn);
     void Close();

@@ -48,5 +48,6 @@ typedef int SocketHandle;
 #include "socket_platform.h"
 #include "socket.h"
 #include "stream_socket.h"
+#include "server_socket.h"
 
 #endif

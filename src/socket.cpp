@@ -7,6 +7,11 @@ namespace Netz
   {
   }
 
+  bool SocketBase::IsOpen() const
+  {
+    return socket != INVALID_SOCKET;
+  }
+
   void SocketBase::Bind(const ConnectionData& conn)
   {
     if(socket == INVALID_SOCKET)
