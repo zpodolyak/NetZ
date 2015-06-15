@@ -3,7 +3,23 @@
 
 namespace Netz
 {
-  class SocketOption;
+  struct SocketOption
+  {
+    int level;
+    int name;
+    int value;
+
+    SocketOption() {}
+    SocketOption(int _level, int _name, int _value)
+      : level(_level)
+      , name(_name)
+      , value(_value) {}
+
+    std::size_t Size() const { return sizeof(value); }
+    int* ValueData() { return &value; }
+    const int* ValueData() const { return &value; }
+    bool operator==(const SocketOption& other) const;
+  };
    
   class SocketBase
   {
@@ -37,8 +53,8 @@ namespace Netz
     int  Connect(const ConnectionData& conn);
     void Close();
 
-    void GetSocketOption(SocketOption& opt) const;
-    void SetSocketOption(const SocketOption& opt);
+    std::error_code GetSocketOption(SocketOption& opt) const;
+    std::error_code SetSocketOption(const SocketOption& opt);
 
     ConnectionData LocalConnection() const;
     ConnectionData RemoteConnection() const;

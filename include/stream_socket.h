@@ -25,7 +25,7 @@ namespace Netz
     {
       std::error_code ec;
       int bytes = ErrorWrapper(::send(socket, buffer, length), ec);
-      if(ec == std::errc::operation_would_block
+      if (ec == std::errc::operation_would_block
         || ec == std::errc::resource_unavailable_try_again)
         return SOCKET_ERROR;
       return bytes;
@@ -35,7 +35,7 @@ namespace Netz
     {
       std::error_code ec;
       int bytes = ErrorWrapper(::recv(socket, buffer, length), ec);
-      if(ec == std::errc::operation_would_block
+      if (ec == std::errc::operation_would_block
         || ec == std::errc::resource_unavailable_try_again)
         return SOCKET_ERROR;
       return bytes;

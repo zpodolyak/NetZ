@@ -2,6 +2,11 @@
 
 namespace Netz
 {
+  bool SocketOption::operator==(const SocketOption& other) const
+  {
+    return level == other.level && name == other.name && value == other.value;
+  }
+
   SocketBase::SocketBase()
   : socket(INVALID_SOCKET)
   {
@@ -38,12 +43,24 @@ namespace Netz
     socket = INVALID_SOCKET;
   }
 
-  void SocketBase::GetSocketOption(SocketOption& opt) const
+  std::error_code SocketBase::GetSocketOption(SocketOption& opt) const
   {
+    if (socket == INVALID_SOCKET)
+      return std::make_error_code(std::errc::bad_file_descriptor);
+    std::error_code ec;
+    auto optLen = opt.Size();
+    ErrorWrapper(::getsockopt(socket, opt.level, opt.name, (char*)opt.ValueData(), &optLen), ec);
+    return ec;
   }
 
-  void SocketBase::SetSocketOption(const SocketOption& opt)
+  std::error_code SocketBase::SetSocketOption(const SocketOption& opt)
   {
+    if (socket == INVALID_SOCKET)
+      return std::make_error_code(std::errc::bad_file_descriptor);
+    std::error_code ec;
+    ErrorWrapper(::setsockopt(socket, opt.level, opt.name, (const char*)opt.ValueData(), (int)opt.Size()), ec);
+    return ec;
+    
   }
 
   ConnectionData SocketBase::LocalConnection() const
