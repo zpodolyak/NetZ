@@ -52,7 +52,11 @@ namespace Netz
     if (socket == INVALID_SOCKET)
       return std::make_error_code(std::errc::bad_file_descriptor);
     std::error_code ec;
+#ifdef WIN32
     auto optLen = int(opt.Size());
+#else
+    auto optLen = opt.Size();
+#endif
     ErrorWrapper(::getsockopt(socket, opt.level, opt.name, (char*)opt.ValueData(), &optLen), ec);
     return ec;
   }

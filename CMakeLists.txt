@@ -5,6 +5,10 @@ option(BUILD_TESTS "Build unit tests" OFF)
 
 include_directories(include)
 
+if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  set(CMAKE_COMPILER_IS_CLANGXX 1)
+endif ()
+
 if (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_CLANGXX)
   add_definitions(-std=c++11
                   -Wall

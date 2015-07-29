@@ -22,7 +22,11 @@ int main(int argc, char* argv[])
       // bypass the Reactor for now
       for(;;)
       {
+#ifdef WIN32
         auto sockLen = int(sizeof(sockaddr_storage));
+#else
+        auto sockLen = sizeof(sockaddr_storage);
+#endif
         int in = ::accept(s, (struct sockaddr *)&addr, &sockLen);
         if (in == -1) 
         {

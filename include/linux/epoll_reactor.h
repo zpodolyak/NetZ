@@ -12,7 +12,7 @@ namespace Netz
     Reactor();
     ~Reactor();
 
-    void AddIoHandler(event_handle event, const CompletionHandler &listener);
+    void Add(event_handle event, CompletionHandler listener);
     void CancelEvent(event_handle event);
     bool Run(int timeout);
     void Stop();
