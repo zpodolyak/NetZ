@@ -22,7 +22,7 @@ int main(int argc, char* argv[])
       // bypass the Reactor for now
       for(;;)
       {
-        size_t sockLen = sizeof(sockaddr_storage);
+        auto sockLen = int(sizeof(sockaddr_storage));
         int in = ::accept(s, (struct sockaddr *)&addr, &sockLen);
         if (in == -1) 
         {
@@ -30,7 +30,11 @@ int main(int argc, char* argv[])
           continue;
         }           
         DebugMessage("received new connection!");
+#ifdef WIN32
+        ::closesocket(in);
+#else
         ::close(in);
+#endif
         break;                              
       }
     }

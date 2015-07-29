@@ -89,11 +89,15 @@ namespace Netz
             continue;
         
         int yes=1;
-        ::setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
+        ::setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, (const char*)&yes, sizeof(int));
       
         if (::bind(sockfd, p->ai_addr, p->ai_addrlen) < 0) 
         {
+#ifdef WIN32
+          ::closesocket(sockfd);
+#else
           ::close(sockfd);
+#endif
           continue;
         }
         break;
@@ -129,7 +133,11 @@ namespace Netz
         if((::connect(sockfd, p->ai_addr, p->ai_addrlen)) < 0)
         {
           PrintError("connect() error");
+#ifdef WIN32
+          ::closesocket(sockfd);
+#else
           ::close(sockfd);
+#endif
           continue;
         }
         break;

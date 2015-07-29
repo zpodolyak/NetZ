@@ -1,5 +1,9 @@
 #include "common.h"
 
+#ifdef WIN32
+# pragma comment(lib, "ws2_32.lib")
+#endif
+
 namespace Netz
 {
   bool SocketOption::operator==(const SocketOption& other) const
@@ -48,7 +52,7 @@ namespace Netz
     if (socket == INVALID_SOCKET)
       return std::make_error_code(std::errc::bad_file_descriptor);
     std::error_code ec;
-    auto optLen = opt.Size();
+    auto optLen = int(opt.Size());
     ErrorWrapper(::getsockopt(socket, opt.level, opt.name, (char*)opt.ValueData(), &optLen), ec);
     return ec;
   }

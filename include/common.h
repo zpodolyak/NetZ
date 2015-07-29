@@ -35,8 +35,16 @@
 typedef int SocketHandle;
 # define INVALID_SOCKET -1
 # define SOCKET_ERROR -1
+#elif defined(WIN32)
+# include "windowsx.h"
+# include "ws2tcpip.h"
+
+#define NOMINMAX
+#define WIN32_LEAN_AND_MEAN
+
+typedef SOCKET SocketHandle;
 #else
-# error ERROR: currently only Linux is supported!
+# error ERROR: Unsupported Platform!
 #endif
 
 
