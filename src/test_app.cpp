@@ -1,21 +1,23 @@
 #include "common.h"
 
+using Netz::Protocol;
+using Netz::ProtocolData;
+
 int main(int argc, char* argv[])
 {
+  Netz::SocketPlatform::InitPlatform();
   SocketHandle s;
   if(argc == 3)
   {
-    if((s = Netz::TcpSocket::CreateClientSocket<Netz::ProtocolData<Netz::Protocol::TCP>>(std::stoi(argv[2]), argv[1])) != INVALID_SOCKET)
-    {
-      DebugMessage("connected to server at %s", argv[1]);
-    }
+    if((s = Netz::TcpSocket::CreateClientSocket<ProtocolData<Protocol::TCP>>(std::stoi(argv[2]), argv[1])) != INVALID_SOCKET)
+      DebugMessage("connected to server!");
     else
       DebugMessage("could not obtain socket! Exiting...");
   }
   else
   {
     struct sockaddr_storage addr;
-    if((s = Netz::TcpSocket::CreateServerSocket<Netz::ProtocolData<Netz::Protocol::TCP>>(1112)) != INVALID_SOCKET)
+    if((s = Netz::TcpSocket::CreateServerSocket<ProtocolData<Protocol::TCP>>(1112)) != INVALID_SOCKET)
     {
       DebugMessage("waiting for connections...");
       
@@ -34,17 +36,13 @@ int main(int argc, char* argv[])
           continue;
         }           
         DebugMessage("received new connection!");
-#ifdef WIN32
-        ::closesocket(in);
-#else
-        ::close(in);
-#endif
+        Netz::SocketPlatform::Close(in);
         break;                              
       }
     }
     else
       DebugMessage("could not obtain socket! Exiting...");
  }
-
+  Netz::SocketPlatform::ShutdownPlatform();
 	return 0;
 }

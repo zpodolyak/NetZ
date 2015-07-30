@@ -93,11 +93,7 @@ namespace Netz
       
         if (::bind(sockfd, p->ai_addr, p->ai_addrlen) < 0) 
         {
-#ifdef WIN32
-          ::closesocket(sockfd);
-#else
-          ::close(sockfd);
-#endif
+          SocketPlatform::Close(sockfd);
           continue;
         }
         break;
@@ -129,15 +125,11 @@ namespace Netz
       {
         if ((sockfd = ::socket(p->ai_family, p->ai_socktype, p->ai_protocol)) < 0)
           continue;
-        
+
         if((::connect(sockfd, p->ai_addr, p->ai_addrlen)) < 0)
         {
           PrintError("connect() error");
-#ifdef WIN32
-          ::closesocket(sockfd);
-#else
-          ::close(sockfd);
-#endif
+          SocketPlatform::Close(sockfd);
           continue;
         }
         break;

@@ -5,6 +5,8 @@ namespace Netz
 {
   namespace SocketPlatform
   {
+    void InitPlatform();
+    void ShutdownPlatform();
     void SetNonBlocking(SocketHandle socket, bool mode);
     void Close(SocketHandle socket);
     const char* inet_ntop(int af, const void* src, char* dest, size_t length);

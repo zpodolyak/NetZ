@@ -13,6 +13,7 @@ TEST(ContrivedExampleTest, CreateSocket)
 
 int main(int argc, char** argv)
 {
+  Netz::SocketPlatform::InitPlatform();
   ::testing::InitGoogleMock(&argc, argv);
   return RUN_ALL_TESTS();
 }
@@ -22,4 +23,6 @@ int main(int argc, char** argv)
 #include "../src/address.cpp"
 #ifdef PLATFORM_LINUX
 # include "../src/linux/socket_linux.cpp"
+#else
+# include "../src/windows/socket_windows.cpp"
 #endif

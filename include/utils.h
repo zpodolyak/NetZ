@@ -1,9 +1,9 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-inline void PrintError(const char* message)
+inline void PrintError(const char* message, int error_code = 0)
 {
-  fprintf(stderr, "%s error: %s\n", std::strerror(errno), message);
+  fprintf(stderr, "errno %s: %s\n", std::strerror((error_code != 0) ? error_code : errno), message);
 }
 
 inline void PrintError(const std::error_code& ec)

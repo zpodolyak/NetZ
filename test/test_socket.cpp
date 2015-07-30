@@ -23,10 +23,8 @@ public:
 
 TEST_F(Test_TcpSocket, Open)
 {
-  EXPECT_NE(sock.IsOpen(), INVALID_SOCKET);
+  EXPECT_NE(sock.IsOpen(), false);
   EXPECT_EQ(conn.GetPort(), 1112);
-  Address addr(Address::FromString("127.0.0.1")); 
-  EXPECT_STREQ(addr.ToString().c_str(), "127.0.0.1"); 
 }
 
 TEST_F(Test_TcpSocket, GetSetOption)

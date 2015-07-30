@@ -4,6 +4,14 @@ namespace Netz
 {
   namespace SocketPlatform
   {
+    void InitPlatform()
+    {
+    }
+
+    void ShutdownPlatform()
+    {
+    }
+
     void SetNonBlocking(SocketHandle socket, bool mode)
     {
       int flags = ::fcntl(socket, F_GETFL, 0);
