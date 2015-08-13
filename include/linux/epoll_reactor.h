@@ -11,7 +11,7 @@ namespace Netz
 
     void RegisterDescriptor(int type, SocketHandle fd, ReactorOperation* op);
     void CancelDescriptor(SocketHandle fd);
-    bool Run(int timeout);
+    void Run(int timeout);
     void Stop();
   private:
     int reactorFD;

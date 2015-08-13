@@ -1,5 +1,7 @@
 #include "common.h"
-#include "select_reactor.h"
+
+#ifndef HAS_EPOLL
+# include "select_reactor.h"
 
 namespace Netz
 {
@@ -28,3 +30,5 @@ namespace Netz
   {
   }
 }
+
+#endif
