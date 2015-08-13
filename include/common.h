@@ -3,6 +3,7 @@
 
 // std includes
 #include <vector>
+#include <deque>
 #include <memory>
 #include <string>
 #include <cstring>

@@ -43,6 +43,6 @@ int main(int argc, char* argv[])
     else
       DebugMessage("could not obtain socket! Exiting...");
  }
-  Netz::SocketPlatform::ShutdownPlatform();
-	return 0;
+ Netz::SocketPlatform::ShutdownPlatform();
+ return 0;
 }

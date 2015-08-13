@@ -3,23 +3,19 @@
 
 namespace Netz
 {
-  using event_handle = std::uintptr_t;
-  using CompletionHandler = std::function<void()>;
-
   class Reactor
   {
   public:
     Reactor();
     ~Reactor();
 
-    void Add(event_handle event, CompletionHandler listener);
-    void CancelEvent(event_handle event);
+    void RegisterDescriptor(int type, SocketHandle fd, ReactorOperation* op);
+    void CancelDescriptor(SocketHandle fd);
     bool Run(int timeout);
     void Stop();
   private:
     int reactorFD;
-    std::unordered_map<event_handle, CompletionHandler> eventMap;
-    event_handle eventCounter;
+    std::deque<ReactorOperation> taskQueue[REACTOR_QUEUE_SIZE];
   };
 }
 
