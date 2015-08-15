@@ -9,13 +9,13 @@ namespace Netz
     Reactor();
     ~Reactor();
 
-    void RegisterDescriptor(int type, SocketHandle fd, ReactorOperation* op);
+    void RegisterDescriptor(int type, SocketHandle fd, ReactorOperation&& op);
     void CancelDescriptor(SocketHandle fd);
     void Run(int timeout);
     void Stop();
   private:
     int reactorFD;
-    std::deque<ReactorOperation> taskQueue[REACTOR_QUEUE_SIZE];
+    std::unordered_map<SocketHandle, std::deque<ReactorOperation>> taskQueue[REACTOR_QUEUES_SIZE];
   };
 }
 

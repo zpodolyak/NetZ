@@ -3,19 +3,35 @@
 
 namespace Netz
 {
-  enum class ReactorOps
+  enum ReactorOps
   {
     read = 0,
     write,
     error,
-    max_ops
+    max_ops,
+    connect = write
   };
 
-  const int REACTOR_QUEUE_SIZE = 3;
+  const int REACTOR_QUEUES_SIZE = 3;
 
-  struct ReactorOperation
+  class ReactorOperation
   {
+    using CompletionHandler = void(*)(const std::error_code&);
+    friend class Reactor;
+  public:
+    ReactorOperation(SocketHandle fd, CompletionHandler cFunc)
+      : descriptor(fd)
+      , comp(cFunc)
+    {}
 
+    void RunOperation(const std::error_code& ec_)
+    {
+      comp(ec_);
+    }
+  private:
+    SocketHandle descriptor;
+    CompletionHandler comp;
+    std::error_code ec;
   };
 }
 
