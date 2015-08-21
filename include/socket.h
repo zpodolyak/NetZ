@@ -55,7 +55,7 @@ namespace Netz
     int Connect(const ConnectionData& conn);
 
     template <typename Handler>
-    int SocketBase::Connect(const ConnectionData& conn, Handler&& handler)
+    int Connect(const ConnectionData& conn, Handler&& handler)
     {
       const sockaddr_in *socketAddress = &conn.data;
       if (socket == INVALID_SOCKET || !socketAddress || !service)

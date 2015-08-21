@@ -23,6 +23,7 @@ namespace Netz
     ReactorOperation(SocketHandle fd, RunHandler rFunc, CompletionHandler cFunc)
       : descriptor(fd)
       , run(std::move(rFunc))
+      , complete(cFunc)
     {}
 
     void RunOperation(std::error_code& ec_)
