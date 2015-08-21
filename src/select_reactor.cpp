@@ -15,12 +15,12 @@ namespace Netz
     Stop();
   }
 
-  void Reactor::RegisterDescriptor(int type, SocketHandle fd, ReactorOperation&& op)
+  void Reactor::RegisterDescriptor(int type, ReactorOperation&& op)
   {
-    if (!(type < ReactorOps::max_ops), fd == INVALID_SOCKET)
+    if (!(type < ReactorOps::max_ops), op.descriptor == INVALID_SOCKET)
       return;
 
-    auto it = taskQueue[type].emplace(std::piecewise_construct, std::forward_as_tuple(fd), std::forward_as_tuple());
+    auto it = taskQueue[type].emplace(std::piecewise_construct, std::forward_as_tuple(op.descriptor), std::forward_as_tuple());
     it.first->second.push_back(std::move(op));
   }
 
@@ -58,7 +58,7 @@ namespace Netz
 
     if (result > 0)
       for (int i = ReactorOps::max_ops; i >= 0; --i)
-        for (int j = 0; j < fds[i].fd_count; ++j)
+        for (std::size_t j = 0; j < fds[i].fd_count; ++j)
           for (auto rOp : taskQueue[i][fds[i].fd_array[j]])
             rOp.RunOperation(ec);
   }

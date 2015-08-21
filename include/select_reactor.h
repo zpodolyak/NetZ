@@ -2,14 +2,14 @@
 
 namespace Netz
 {
-  class Reactor
+  class Reactor : public SocketService
   {
   public:
     Reactor();
     ~Reactor();
 
-    void RegisterDescriptor(int type, SocketHandle fd, ReactorOperation&& op);
-    void CancelDescriptor(SocketHandle fd);
+    virtual void RegisterDescriptor(int type, ReactorOperation&& op) override;
+    virtual void CancelDescriptor(SocketHandle fd) override;
     void Run(int timeout);
     void Stop();
   private:

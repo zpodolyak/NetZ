@@ -9,7 +9,7 @@ int main(int argc, char* argv[])
   SocketHandle s;
   if(argc == 3)
   {
-    if((s = Netz::TcpSocket::CreateClientSocket<ProtocolData<Protocol::TCP>>(std::stoi(argv[2]), argv[1])) != INVALID_SOCKET)
+    if((s = Netz::CreateClientSocket<ProtocolData<Protocol::TCP>>(std::stoi(argv[2]), argv[1])) != INVALID_SOCKET)
       DebugMessage("connected to server!");
     else
       DebugMessage("could not obtain socket! Exiting...");
@@ -17,7 +17,7 @@ int main(int argc, char* argv[])
   else
   {
     struct sockaddr_storage addr;
-    if((s = Netz::TcpSocket::CreateServerSocket<ProtocolData<Protocol::TCP>>(1112)) != INVALID_SOCKET)
+    if((s = Netz::CreateServerSocket<ProtocolData<Protocol::TCP>>(1112)) != INVALID_SOCKET)
     {
       DebugMessage("waiting for connections...");
       

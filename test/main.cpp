@@ -3,11 +3,9 @@
 
 #include "common.h"
 
-using Socket = Netz::TcpSocket;
-
 TEST(ContrivedExampleTest, CreateSocket)
 {
-  auto s = Socket::CreateServerSocket<Netz::ProtocolData<Netz::Protocol::TCP>>(1112);
+  auto s = Netz::CreateServerSocket<Netz::ProtocolData<Netz::Protocol::TCP>>(1112);
   EXPECT_NE(INVALID_SOCKET, s);
 }
 

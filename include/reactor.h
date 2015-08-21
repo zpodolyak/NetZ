@@ -1,5 +1,4 @@
-#ifndef REACTOR_H
-#define REACTOR_H
+#pragma once
 
 namespace Netz
 {
@@ -14,23 +13,31 @@ namespace Netz
 
   const int REACTOR_QUEUES_SIZE = 3;
 
+  using RunHandler = std::function<void(std::error_code&)>;
+  using CompletionHandler = void(*)(const std::error_code&);
+
   class ReactorOperation
   {
-    using CompletionHandler = void(*)(const std::error_code&);
     friend class Reactor;
   public:
-    ReactorOperation(SocketHandle fd, CompletionHandler cFunc)
+    ReactorOperation(SocketHandle fd, RunHandler rFunc, CompletionHandler cFunc)
       : descriptor(fd)
-      , comp(cFunc)
+      , run(std::move(rFunc))
     {}
 
-    void RunOperation(const std::error_code& ec_)
+    void RunOperation(std::error_code& ec_)
     {
-      comp(ec_);
+      run(ec_);
+    }
+
+    void CompleteOperation(const std::error_code& ec_)
+    {
+      complete(ec_);
     }
   private:
     SocketHandle descriptor;
-    CompletionHandler comp;
+    RunHandler run;
+    CompletionHandler complete;
     std::error_code ec;
   };
 }
@@ -39,7 +46,5 @@ namespace Netz
 #  include "linux/epoll_reactor.h"
 #else
 #  include "select_reactor.h"
-#endif
-
 #endif
 

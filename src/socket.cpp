@@ -16,6 +16,12 @@ namespace Netz
   {
   }
 
+  SocketBase::SocketBase(SocketService * _service)
+    : socket(INVALID_SOCKET)
+    , service(_service)
+  {
+  }
+
   bool SocketBase::IsOpen() const
   {
     return socket != INVALID_SOCKET;

@@ -28,6 +28,7 @@ namespace Netz
     SocketBase& operator=(const SocketBase&) = delete;
 
     SocketBase();
+    SocketBase(SocketService* _service);
 
     template <typename ProtocolType>
     SocketBase(const ProtocolType& prot)
@@ -50,7 +51,19 @@ namespace Netz
     
     bool IsOpen() const;
     void Bind(const ConnectionData& conn);
-    int  Connect(const ConnectionData& conn);
+
+    int Connect(const ConnectionData& conn);
+
+    template <typename Handler>
+    int SocketBase::Connect(const ConnectionData& conn, Handler&& handler)
+    {
+      const sockaddr_in *socketAddress = &conn.data;
+      if (socket == INVALID_SOCKET || !socketAddress || !service)
+        return SOCKET_ERROR;
+
+      service->RegisterDescriptor(ReactorOps::connect, ConnectOperation(conn, std::forward(handler)));
+    }
+
     void Close();
 
     std::error_code GetSocketOption(SocketOption& opt) const;
@@ -61,20 +74,16 @@ namespace Netz
 
     bool IsNonBlocking() const;
     void SetNonBlocking(bool mode);
-    
-    template <typename ProtocolType>
-    static SocketHandle CreateServerSocket(unsigned short port);
-
-    template <typename ProtocolType>
-    static SocketHandle CreateClientSocket(unsigned short port, const char* host);
+ 
   protected:
     ~SocketBase() {}
 
     SocketHandle socket;
+    SocketService* service;
   };
 
   template <typename ProtocolType>
-  SocketHandle SocketBase::CreateServerSocket(unsigned short port)
+  SocketHandle CreateServerSocket(unsigned short port)
   {
     SocketHandle sockfd;
     addrinfo *res = nullptr, *p = nullptr;
@@ -113,7 +122,7 @@ namespace Netz
   }
 
   template <typename ProtocolType>
-  SocketHandle SocketBase::CreateClientSocket(unsigned short port, const char* host)
+  SocketHandle CreateClientSocket(unsigned short port, const char* host)
   {
     addrinfo *res = nullptr, *p = nullptr;
     SocketHandle sockfd;
