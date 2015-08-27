@@ -16,15 +16,17 @@ namespace Netz
   {
   }
 
-  SocketBase::SocketBase(SocketService * _service)
-    : socket(INVALID_SOCKET)
-    , service(_service)
-  {
-  }
-
   bool SocketBase::IsOpen() const
   {
     return socket != INVALID_SOCKET;
+  }
+
+  std::error_code SocketBase::Assign(SocketHandle _socket)
+  {
+    if (IsOpen())
+      return std::make_error_code(std::errc::already_connected);
+    socket = _socket;
+    return std::error_code();
   }
 
   void SocketBase::Bind(const ConnectionData& conn)

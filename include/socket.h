@@ -28,10 +28,18 @@ namespace Netz
     SocketBase& operator=(const SocketBase&) = delete;
 
     SocketBase();
-    SocketBase(SocketService* _service);
 
     template <typename ProtocolType>
     SocketBase(const ProtocolType& prot)
+      : socket(INVALID_SOCKET)
+    {
+      Open(prot);
+    }
+
+    template <typename ProtocolType>
+    SocketBase(SocketService* _service, const ProtocolType& prot)
+      : socket(INVALID_SOCKET)
+      , service(_service)
     {
       Open(prot);
     }
@@ -50,18 +58,19 @@ namespace Netz
     }
     
     bool IsOpen() const;
+    std::error_code Assign(SocketHandle _socket);
     void Bind(const ConnectionData& conn);
 
     int Connect(const ConnectionData& conn);
 
     template <typename Handler>
-    int Connect(const ConnectionData& conn, Handler&& handler)
+    void Connect(const ConnectionData& conn, Handler&& handler)
     {
       const sockaddr_in *socketAddress = &conn.data;
       if (socket == INVALID_SOCKET || !socketAddress || !service)
         return SOCKET_ERROR;
 
-      service->RegisterDescriptor(ReactorOps::connect, ConnectOperation(conn, std::forward(handler)));
+      service->RegisterDescriptor(ReactorOps::connect, ConnectOperation(conn, socket, std::forward(handler)));
     }
 
     void Close();
@@ -76,10 +85,10 @@ namespace Netz
     void SetNonBlocking(bool mode);
  
   protected:
-    ~SocketBase() {}
+    ~SocketBase() { Close(); }
 
     SocketHandle socket;
-    SocketService* service;
+    SocketService* service = nullptr;
   };
 
   template <typename ProtocolType>

@@ -2,47 +2,35 @@
 
 using Netz::Protocol;
 using Netz::ProtocolData;
+using Netz::Reactor;
+using Netz::ConnectionData;
+using Netz::Address;
+using Netz::TcpSocket;
+using Netz::TcpServerSocket;
 
 int main(int argc, char* argv[])
 {
   Netz::SocketPlatform::InitPlatform();
-  SocketHandle s;
+  ProtocolData<Protocol::TCP> protocol;
+
   if(argc == 3)
   {
-    if((s = Netz::CreateClientSocket<ProtocolData<Protocol::TCP>>(std::stoi(argv[2]), argv[1])) != INVALID_SOCKET)
+    TcpSocket client(protocol);
+    ConnectionData conn(Address::FromString(argv[1]), std::stoi(argv[2]));
+    if(client.Connect(conn) != INVALID_SOCKET)
       DebugMessage("connected to server!");
     else
       DebugMessage("could not obtain socket! Exiting...");
   }
   else
   {
-    struct sockaddr_storage addr;
-    if((s = Netz::CreateServerSocket<ProtocolData<Protocol::TCP>>(1112)) != INVALID_SOCKET)
-    {
-      DebugMessage("waiting for connections...");
-      
-      // bypass the Reactor for now
-      for(;;)
-      {
-#ifdef WIN32
-        auto sockLen = int(sizeof(sockaddr_storage));
-#else
-        auto sockLen = sizeof(sockaddr_storage);
-#endif
-        int in = ::accept(s, (struct sockaddr *)&addr, &sockLen);
-        if (in == -1) 
-        {
-          PrintError("accept");
-          continue;
-        }           
-        DebugMessage("received new connection!");
-        Netz::SocketPlatform::Close(in);
-        break;                              
-      }
-    }
-    else
-      DebugMessage("could not obtain socket! Exiting...");
- }
+    ConnectionData conn(Address::FromString("127.0.0.1"), 1112);
+    TcpServerSocket server(protocol, conn);
+    TcpSocket client;
+    DebugMessage("waiting for connections...");
+    server.Accept(client, &conn);
+    DebugMessage("received new connection!");
+  }
  Netz::SocketPlatform::ShutdownPlatform();
  return 0;
 }

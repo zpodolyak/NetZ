@@ -26,6 +26,13 @@ namespace Netz
       Listen();
     }
 
+    ServerSocket(SocketService* _service, const protocol_type& prot, const ConnectionData& conn)
+      : SocketBase(_service, prot)
+    {
+      Bind(conn);
+      Listen();
+    }
+
     void Listen()
     {
       if (socket == INVALID_SOCKET)
@@ -42,16 +49,28 @@ namespace Netz
       if (socket == INVALID_SOCKET)
         return;
       std::error_code ec;
+#ifdef WIN32
+      int addrLen = 0;
+#else
       std::size_t addrLen = 0;
+#endif
       sockaddr* addr = nullptr;
       if (conn)
       {
         addrLen = sizeof(conn->data);
         addr = (sockaddr*)&conn->data;
       }
-      peer.socket = ErrorWrapper(::accept(socket, addr, conn ? &addrLen : 0), ec);
+      peer.Assign(ErrorWrapper(::accept(socket, addr, conn ? &addrLen : 0), ec));
       if(ec)
         PrintError(ec);
+    }
+
+    template <typename SocketType, typename Handler>
+    void Accept(SocketType& peer, ConnectionData* conn, Handler&& handler)
+    {
+      if (socket == INVALID_SOCKET)
+        return;
+      service->RegisterDescriptor(ReactorOps::read, AcceptOperation(peer, conn, socket, std::forward(handler)));
     }
   };
 

@@ -15,15 +15,17 @@ namespace Netz
 
   using RunHandler = std::function<void(std::error_code&)>;
   using CompletionHandler = void(*)(const std::error_code&);
+  using DataCompletionHandler = void(*)(int, const std::error_code&);
+  template <typename SocketType>
+  using AcceptCompletionHandler = void(*)(SocketType&, const std::error_code&);
 
   class ReactorOperation
   {
     friend class Reactor;
   public:
-    ReactorOperation(SocketHandle fd, RunHandler rFunc, CompletionHandler cFunc)
+    ReactorOperation(SocketHandle fd, RunHandler rFunc)
       : descriptor(fd)
       , run(std::move(rFunc))
-      , complete(cFunc)
     {}
 
     void RunOperation(std::error_code& ec_)
@@ -31,21 +33,13 @@ namespace Netz
       run(ec_);
     }
 
-    void CompleteOperation(const std::error_code& ec_)
-    {
-      complete(ec_);
-    }
-  private:
+    virtual void CompleteOperation() {}
+  protected:
     SocketHandle descriptor;
     RunHandler run;
-    CompletionHandler complete;
     std::error_code ec;
   };
 }
 
-#if defined PLATFORM_LINUX && defined HAS_EPOLL
-#  include "linux/epoll_reactor.h"
-#else
-#  include "select_reactor.h"
-#endif
+#include "select_reactor.h"
 

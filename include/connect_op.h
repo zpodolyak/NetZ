@@ -7,27 +7,32 @@ namespace Netz
   class ConnectOperation : public ReactorOperation
   {
   public:
-    ConnectOperation(sockaddr_in* conn, SocketHandle fd, CompletionHandler handler)
-      : ReactorOperation(fd, [this] (std::error_code& _ec)
+    ConnectOperation(sockaddr_in* conn, SocketHandle fd, CompletionHandler _handler)
+      : ReactorOperation(fd, [this](std::error_code& _ec)
     {
       DoConnect(_ec);
-    }
-    , handler)
-    , socketAddress(conn)
-    , desc(fd)
+    })
+      , socketAddress(conn)
+      , handler(_handler)
     {
 
     }
 
     void DoConnect(std::error_code& _ec)
     {
-      if (desc == INVALID_SOCKET || !socketAddress)
+      if (descriptor == INVALID_SOCKET || !socketAddress)
         return;
-      ErrorWrapper(::connect(desc, (const sockaddr*)socketAddress, sizeof(sockaddr_in)), _ec);
+      ErrorWrapper(::connect(descriptor, (const sockaddr*)socketAddress, sizeof(sockaddr_in)), _ec);
+    }
+
+    virtual void CompleteOperation() override
+    {
+      if (handler)
+        handler(ec);
     }
 
   private:
     sockaddr_in* socketAddress = nullptr;
-    SocketHandle desc;
+    CompletionHandler handler;
   };
 }

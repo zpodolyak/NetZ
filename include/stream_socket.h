@@ -12,7 +12,7 @@ namespace Netz
 
   public:
     StreamSocket()
-     : SocketBase()
+      : SocketBase()
     {
     }
 
@@ -21,24 +21,46 @@ namespace Netz
     {
     }
 
-    int Send(const char* buffer, int length)
+    StreamSocket(SocketService* _service, const protocol_type& prot)
+      : SocketBase(_service, prot)
+    {
+    }
+
+    int Send(const char* buffer, int length, int msg_flags)
     {
       std::error_code ec;
-      int bytes = ErrorWrapper(::send(socket, buffer, length), ec);
+      int bytes = ErrorWrapper(::send(socket, buffer, length, msg_flags), ec);
       if (ec == std::errc::operation_would_block
         || ec == std::errc::resource_unavailable_try_again)
         return SOCKET_ERROR;
       return bytes;
     }
 
-    int Receive(char* buffer, int length)
+    template <typename Handler>
+    void Send(const char* buffer, int length, int msg_flags, Handler&& handler)
+    {
+      if (socket == INVALID_SOCKET || !service)
+        return SOCKET_ERROR;
+      service->RegisterDescriptor(ReactorOps::write, SendOperation(buffer, length, msg_flags, socket, std::forward(handler)));
+    }
+
+    int Receive(char* buffer, int length, int msg_flags = 0)
     {
       std::error_code ec;
-      int bytes = ErrorWrapper(::recv(socket, buffer, length), ec);
+      int bytes = ErrorWrapper(::recv(socket, buffer, length, msg_flags), ec);
       if (ec == std::errc::operation_would_block
         || ec == std::errc::resource_unavailable_try_again)
         return SOCKET_ERROR;
       return bytes;
+    }
+
+
+    template <typename Handler>
+    void Receive(char* buffer, int length, int msg_flags, Handler&& handler)
+    {
+      if (socket == INVALID_SOCKET || !service)
+        return SOCKET_ERROR;
+      service->RegisterDescriptor(ReactorOps::read, ReceiveOperation(buffer, length, msg_flags, socket, std::forward(handler)));
     }
   };
 
