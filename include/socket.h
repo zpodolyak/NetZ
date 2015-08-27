@@ -68,7 +68,7 @@ namespace Netz
     {
       const sockaddr_in *socketAddress = &conn.data;
       if (socket == INVALID_SOCKET || !socketAddress || !service)
-        return SOCKET_ERROR;
+        return;
 
       service->RegisterDescriptor(ReactorOps::connect, ConnectOperation(conn, socket, std::forward(handler)));
     }

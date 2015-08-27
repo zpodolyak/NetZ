@@ -40,7 +40,7 @@ namespace Netz
     void Send(const char* buffer, int length, int msg_flags, Handler&& handler)
     {
       if (socket == INVALID_SOCKET || !service)
-        return SOCKET_ERROR;
+        return;
       service->RegisterDescriptor(ReactorOps::write, SendOperation(buffer, length, msg_flags, socket, std::forward(handler)));
     }
 
@@ -59,7 +59,7 @@ namespace Netz
     void Receive(char* buffer, int length, int msg_flags, Handler&& handler)
     {
       if (socket == INVALID_SOCKET || !service)
-        return SOCKET_ERROR;
+        return;
       service->RegisterDescriptor(ReactorOps::read, ReceiveOperation(buffer, length, msg_flags, socket, std::forward(handler)));
     }
   };

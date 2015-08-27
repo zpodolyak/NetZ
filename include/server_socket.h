@@ -70,7 +70,7 @@ namespace Netz
     {
       if (socket == INVALID_SOCKET)
         return;
-      service->RegisterDescriptor(ReactorOps::read, AcceptOperation(peer, conn, socket, std::forward(handler)));
+      service->RegisterDescriptor(ReactorOps::read, AcceptOperation<SocketType>(peer, conn, socket, std::forward(handler)));
     }
   };
 
