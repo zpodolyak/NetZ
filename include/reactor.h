@@ -27,10 +27,12 @@ namespace Netz
       : descriptor(fd)
       , run(std::move(rFunc))
     {}
+    ReactorOperation(const ReactorOperation&) = default;
 
     void RunOperation(std::error_code& ec_)
     {
       run(ec_);
+      CompleteOperation();
     }
 
     virtual void CompleteOperation() {}

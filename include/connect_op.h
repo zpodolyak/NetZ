@@ -7,7 +7,7 @@ namespace Netz
   class ConnectOperation : public ReactorOperation
   {
   public:
-    ConnectOperation(sockaddr_in* conn, SocketHandle fd, CompletionHandler _handler)
+    ConnectOperation(const sockaddr_in* conn, SocketHandle fd, CompletionHandler _handler)
       : ReactorOperation(fd, [this](std::error_code& _ec)
     {
       DoConnect(_ec);
@@ -32,7 +32,7 @@ namespace Netz
     }
 
   private:
-    sockaddr_in* socketAddress = nullptr;
+    const sockaddr_in* socketAddress = nullptr;
     CompletionHandler handler;
   };
 }

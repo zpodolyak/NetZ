@@ -59,12 +59,16 @@ namespace Netz
     if (result > 0)
       for (int i = ReactorOps::max_ops; i >= 0; --i)
         for (std::size_t j = 0; j < fds[i].fd_count; ++j)
-          for (auto rOp : taskQueue[i][fds[i].fd_array[j]])
+          for (auto& rOp : taskQueue[i][fds[i].fd_array[j]])
+          {
             rOp.RunOperation(ec);
+            shutdown = true; // extremely temporary HACK
+          }
   }
 
   void Reactor::Stop()
   {
+    shutdown = true;
   }
 }
 

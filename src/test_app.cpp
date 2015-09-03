@@ -12,25 +12,35 @@ int main(int argc, char* argv[])
 {
   Netz::SocketPlatform::InitPlatform();
   ProtocolData<Protocol::TCP> protocol;
+  Reactor rtor;
 
-  if(argc == 3)
+  if (argc == 3)
   {
-    TcpSocket client(protocol);
+    TcpSocket client(&rtor, protocol);
     ConnectionData conn(Address::FromString(argv[1]), std::stoi(argv[2]));
-    if(client.Connect(conn) != INVALID_SOCKET)
-      DebugMessage("connected to server!");
-    else
-      DebugMessage("could not obtain socket! Exiting...");
+    client.Connect(conn, [](const std::error_code& ec)
+    {
+      if (ec != std::errc::operation_would_block)
+        DebugMessage("could not obtain socket! Exiting...");
+      else
+        DebugMessage("connected to server!");
+    });
   }
   else
   {
-    ConnectionData conn(Address::FromString("127.0.0.1"), 1112);
-    TcpServerSocket server(protocol, conn);
+    ConnectionData conn;
+    TcpServerSocket server(&rtor, protocol, conn);
+    server.SetNonBlocking(true);
+    conn = server.LocalConnection();
     TcpSocket client;
-    DebugMessage("waiting for connections...");
-    server.Accept(client, &conn);
-    DebugMessage("received new connection!");
+    DebugMessage("waiting for connections on port %h", conn.GetPort());
+    server.Accept(client, &conn, [](TcpSocket& client, const std::error_code& ec)
+    {
+      DebugMessage("received new connection!");
+    });
   }
- Netz::SocketPlatform::ShutdownPlatform();
- return 0;
+  while (rtor.IsRunning()) 
+    rtor.Run(200);
+  Netz::SocketPlatform::ShutdownPlatform();
+  return 0;
 }

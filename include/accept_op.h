@@ -25,7 +25,11 @@ namespace Netz
       if (descriptor == INVALID_SOCKET)
         return;
 
+#ifdef WIN32
+      int addrLen = 0;
+#else
       std::size_t addrLen = 0;
+#endif
       sockaddr* addr = nullptr;
       if (connData)
       {

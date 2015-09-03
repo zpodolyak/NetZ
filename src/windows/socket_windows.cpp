@@ -12,7 +12,8 @@ namespace Netz
 
     void SetNonBlocking(SocketHandle socket, bool mode)
     {
-      
+      u_long iMode = mode ? 1 : 0;
+      ::ioctlsocket(socket, FIONBIO, &iMode);
     }
 
     void ShutdownPlatform()

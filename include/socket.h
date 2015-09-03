@@ -64,13 +64,13 @@ namespace Netz
     int Connect(const ConnectionData& conn);
 
     template <typename Handler>
-    void Connect(const ConnectionData& conn, Handler&& handler)
+    void Connect(const ConnectionData& conn, Handler& handler)
     {
       const sockaddr_in *socketAddress = &conn.data;
       if (socket == INVALID_SOCKET || !socketAddress || !service)
         return;
 
-      service->RegisterDescriptor(ReactorOps::connect, ConnectOperation(conn, socket, std::forward(handler)));
+      service->RegisterDescriptor(ReactorOps::connect, ConnectOperation(socketAddress, socket, handler));
     }
 
     void Close();

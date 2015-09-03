@@ -16,6 +16,8 @@
 #include <unordered_map>
 #include <system_error>
 
+#include <inttypes.h>
+
 // platform specific includes
 #ifdef PLATFORM_LINUX
 # include <linux/version.h>
