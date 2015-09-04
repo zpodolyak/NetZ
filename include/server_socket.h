@@ -66,11 +66,11 @@ namespace Netz
     }
 
     template <typename SocketType, typename Handler>
-    void Accept(SocketType& peer, ConnectionData* conn, Handler& handler)
+    void Accept(SocketType& peer, ConnectionData* conn, const Handler& handler)
     {
       if (socket == INVALID_SOCKET)
         return;
-      service->RegisterDescriptor(ReactorOps::read, AcceptOperation<SocketType>(peer, conn, socket, handler));
+      service->RegisterDescriptor(ReactorOps::read, new AcceptOperation<SocketType>(peer, conn, socket, handler));
     }
   };
 

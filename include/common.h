@@ -9,14 +9,13 @@
 #include <cstring>
 #include <cstdio>
 #include <cstdlib>
+#include <cinttypes>
 #include <sstream>
 #include <functional>
 #include <algorithm>
 #include <cassert>
 #include <unordered_map>
 #include <system_error>
-
-#include <inttypes.h>
 
 // platform specific includes
 #ifdef PLATFORM_LINUX

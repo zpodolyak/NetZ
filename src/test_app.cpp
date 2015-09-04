@@ -16,15 +16,12 @@ int main(int argc, char* argv[])
 
   if (argc == 3)
   {
-    TcpSocket client(&rtor, protocol);
+    TcpSocket client(protocol);
     ConnectionData conn(Address::FromString(argv[1]), std::stoi(argv[2]));
-    client.Connect(conn, [](const std::error_code& ec)
-    {
-      if (ec != std::errc::operation_would_block)
-        DebugMessage("could not obtain socket! Exiting...");
-      else
-        DebugMessage("connected to server!");
-    });
+    if(client.Connect(conn) != INVALID_SOCKET) 
+      DebugMessage("connected to server!");
+    else
+      DebugMessage("could not obtain socket! Exiting...");
   }
   else
   {
@@ -33,14 +30,15 @@ int main(int argc, char* argv[])
     server.SetNonBlocking(true);
     conn = server.LocalConnection();
     TcpSocket client;
-    DebugMessage("waiting for connections on port %h", conn.GetPort());
-    server.Accept(client, &conn, [](TcpSocket& client, const std::error_code& ec)
+    DebugMessage("waiting for connections on port %" PRIu16, conn.GetPort());
+    server.Accept(client, &conn, [&](TcpSocket& client, const std::error_code& ec)
     {
       DebugMessage("received new connection!");
+      rtor.Stop();
     });
+    while (rtor.IsRunning())
+      rtor.Run(200);
   }
-  while (rtor.IsRunning()) 
-    rtor.Run(200);
   Netz::SocketPlatform::ShutdownPlatform();
   return 0;
 }

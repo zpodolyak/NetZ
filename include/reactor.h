@@ -14,10 +14,10 @@ namespace Netz
   const int REACTOR_QUEUES_SIZE = 3;
 
   using RunHandler = std::function<void(std::error_code&)>;
-  using CompletionHandler = void(*)(const std::error_code&);
-  using DataCompletionHandler = void(*)(int, const std::error_code&);
+  using CompletionHandler = std::function<void(const std::error_code&)>;
+  using DataCompletionHandler = std::function<void(int, const std::error_code&)>;
   template <typename SocketType>
-  using AcceptCompletionHandler = void(*)(SocketType&, const std::error_code&);
+  using AcceptCompletionHandler = std::function<void(SocketType&, const std::error_code&)>;
 
   class ReactorOperation
   {
@@ -28,6 +28,7 @@ namespace Netz
       , run(std::move(rFunc))
     {}
     ReactorOperation(const ReactorOperation&) = default;
+    virtual ~ReactorOperation() {}
 
     void RunOperation(std::error_code& ec_)
     {
@@ -42,6 +43,9 @@ namespace Netz
     std::error_code ec;
   };
 }
-
-#include "select_reactor.h"
+#if defined PLATFORM_LINUX && defined HAS_EPOLL
+# include "linux/epoll_reactor.h"
+#else
+# include "select_reactor.h"
+#endif
 

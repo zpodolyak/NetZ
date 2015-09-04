@@ -15,7 +15,11 @@ inline void PrintError(const std::error_code& ec)
 
 inline int ErrorWrapper(int return_value, std::error_code& ec)
 {
+#ifdef WIN32
+  ec = std::error_code(WSAGetLastError(), std::system_category());
+#else
   ec = std::error_code(errno, std::system_category());
+#endif
   return return_value;
 }
 
@@ -25,8 +29,8 @@ inline void DebugMessage(const char* format, ...)
   va_list args;
   va_start(args, format);
   std::vector<char> buf(1+std::vsnprintf(nullptr, 0, format, args));
-  va_end(args);
   std::vsnprintf(buf.data(), buf.size(), format, args);
+  va_end(args);
   std::printf("%s\n", buf.data());
 #endif
 }

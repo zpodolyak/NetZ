@@ -64,13 +64,21 @@ namespace Netz
     int Connect(const ConnectionData& conn);
 
     template <typename Handler>
-    void Connect(const ConnectionData& conn, Handler& handler)
+    void Connect(const ConnectionData& conn, const Handler& handler)
     {
+      std::error_code ec;
       const sockaddr_in *socketAddress = &conn.data;
       if (socket == INVALID_SOCKET || !socketAddress || !service)
         return;
 
-      service->RegisterDescriptor(ReactorOps::connect, ConnectOperation(socketAddress, socket, handler));
+      if (ErrorWrapper(::connect(socket, (const sockaddr*)socketAddress, sizeof(sockaddr_in)), ec) != 0)
+      {
+        if (ec == std::errc::operation_in_progress
+          || ec == std::errc::operation_would_block)
+        {
+          service->RegisterDescriptor(ReactorOps::connect, new ConnectOperation(socketAddress, socket, handler));
+        }
+      }
     }
 
     void Close();
@@ -85,7 +93,12 @@ namespace Netz
     void SetNonBlocking(bool mode);
  
   protected:
-    ~SocketBase() { Close(); }
+    ~SocketBase() 
+    { 
+      if (service)
+        service->CancelDescriptor(socket);
+      Close(); 
+    }
 
     SocketHandle socket;
     SocketService* service = nullptr;

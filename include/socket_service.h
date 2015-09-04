@@ -8,7 +8,7 @@ namespace Netz
   {
   public:
     virtual ~SocketService() {}
-    virtual void RegisterDescriptor(int type, ReactorOperation&& op) = 0;
+    virtual void RegisterDescriptor(int type, ReactorOperation* op) = 0;
     virtual void CancelDescriptor(SocketHandle fd) = 0;
   };
 }
