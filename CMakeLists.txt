@@ -58,8 +58,11 @@ if (MSVC)
   add_definitions(/wd4068 /wd4669)
 endif ()
 
-add_executable(test_app src/test_app.cpp)
-target_link_libraries(test_app netz)
+add_executable(example_tcp_server src/examples/example_tcp_server.cpp)
+target_link_libraries(example_tcp_server netz)
+
+add_executable(example_tcp_client src/examples/example_tcp_client.cpp)
+target_link_libraries(example_tcp_client netz)
 
 if (BUILD_TESTS)
   add_subdirectory(test)
