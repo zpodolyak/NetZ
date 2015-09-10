@@ -22,6 +22,9 @@ inline int ErrorWrapper(int return_value, std::error_code& ec)
   return return_value;
 }
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "Wformat-security"
+
 template <typename... Targs>
 inline void DebugMessage(const char* format, Targs&&... args)
 {
@@ -33,3 +36,4 @@ inline void DebugMessage(const char* format, Targs&&... args)
 #endif
 }
 
+#pragma clang diagnostic pop

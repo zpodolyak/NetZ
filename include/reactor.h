@@ -46,6 +46,6 @@ namespace Netz
 #if defined PLATFORM_LINUX && defined HAS_EPOLL
 # include "linux/epoll_reactor.h"
 #else
-# include "select_reactor.h"
+# include "windows/select_reactor.h"
 #endif
 

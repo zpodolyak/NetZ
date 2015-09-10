@@ -1,7 +1,7 @@
 #include "common.h"
 
 #ifndef HAS_EPOLL
-# include "select_reactor.h"
+# include "windows/select_reactor.h"
 
 namespace Netz
 {
