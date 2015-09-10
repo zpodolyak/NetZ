@@ -14,8 +14,8 @@ namespace Netz
   const int REACTOR_QUEUES_SIZE = 3;
 
   using RunHandler = std::function<void(std::error_code&)>;
-  using CompletionHandler = std::function<void(const std::error_code&)>;
-  using DataCompletionHandler = std::function<void(int, const std::error_code&)>;
+  using CompletionHandler = void(*)(const std::error_code&);
+  using DataCompletionHandler = void(*)(int, const std::error_code&);
   template <typename SocketType>
   using AcceptCompletionHandler = std::function<void(SocketType&, const std::error_code&)>;
 

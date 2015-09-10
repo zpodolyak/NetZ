@@ -37,11 +37,11 @@ namespace Netz
     }
 
     template <typename Handler>
-    void Send(const char* buffer, int length, int msg_flags, const Handler& handler)
+    void Send(const char* buffer, int length, int msg_flags, Handler&& handler)
     {
       if (socket == INVALID_SOCKET || !service)
         return;
-      service->RegisterDescriptor(ReactorOps::write, new SendOperation(buffer, length, msg_flags, socket, handler));
+      service->RegisterDescriptor(ReactorOps::write, new SendOperation(buffer, length, msg_flags, socket, std::forward<Handler>(handler)));
     }
 
     int Receive(char* buffer, int length, int msg_flags = 0)
@@ -56,11 +56,11 @@ namespace Netz
 
 
     template <typename Handler>
-    void Receive(char* buffer, int length, int msg_flags, const Handler& handler)
+    void Receive(char* buffer, int length, int msg_flags, Handler&& handler)
     {
       if (socket == INVALID_SOCKET || !service)
         return;
-      service->RegisterDescriptor(ReactorOps::read, new ReceiveOperation(buffer, length, msg_flags, socket, handler));
+      service->RegisterDescriptor(ReactorOps::read, new ReceiveOperation(buffer, length, msg_flags, socket, std::forward<Handler>(handler)));
     }
   };
 

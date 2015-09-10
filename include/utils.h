@@ -1,5 +1,4 @@
-#ifndef UTILS_H
-#define UTILS_H
+#pragma once
 
 inline void PrintError(const char* message, int error_code = 0)
 {
@@ -23,16 +22,14 @@ inline int ErrorWrapper(int return_value, std::error_code& ec)
   return return_value;
 }
 
-inline void DebugMessage(const char* format, ...)
+template <typename... Targs>
+inline void DebugMessage(const char* format, Targs&&... args)
 {
 #ifdef DEBUG
-  va_list args;
-  va_start(args, format);
-  std::vector<char> buf(1+std::vsnprintf(nullptr, 0, format, args));
-  std::vsnprintf(buf.data(), buf.size(), format, args);
-  va_end(args);
-  std::printf("%s\n", buf.data());
+  int sz = std::snprintf(nullptr, 0, format, std::forward<Targs>(args)...);
+  std::vector<char> buff(sz + 1);
+  std::snprintf(&buff[0], buff.size(), format, std::forward<Targs>(args)...);
+  std::printf("%s\n", buff.data());
 #endif
 }
 
-#endif

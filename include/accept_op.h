@@ -15,7 +15,7 @@ namespace Netz
     })
       , peer(_peer)
       , connData(conn)
-      , handler(_handler)
+      , handler(std::move(_handler))
     {
 
     }

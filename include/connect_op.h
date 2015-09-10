@@ -13,7 +13,7 @@ namespace Netz
       DoConnect(_ec);
     })
       , socketAddress(conn)
-      , handler(_handler)
+      , handler(std::move(_handler))
     {
 
     }

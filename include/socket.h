@@ -64,7 +64,7 @@ namespace Netz
     int Connect(const ConnectionData& conn);
 
     template <typename Handler>
-    void Connect(const ConnectionData& conn, const Handler& handler)
+    void Connect(const ConnectionData& conn, Handler&& handler)
     {
       std::error_code ec;
       const sockaddr_in *socketAddress = &conn.data;
@@ -76,7 +76,7 @@ namespace Netz
         if (ec == std::errc::operation_in_progress
           || ec == std::errc::operation_would_block)
         {
-          service->RegisterDescriptor(ReactorOps::connect, new ConnectOperation(socketAddress, socket, handler));
+          service->RegisterDescriptor(ReactorOps::connect, new ConnectOperation(socketAddress, socket, std::forward<Handler>(handler)));
         }
       }
     }

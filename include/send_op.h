@@ -15,7 +15,7 @@ namespace Netz
       , buffer(buff)
       , length(len)
       , flags(msg_flags)
-      , handler(_handler)
+      , handler(std::move(_handler))
     {
 
     }
