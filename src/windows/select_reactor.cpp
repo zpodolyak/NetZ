@@ -60,9 +60,13 @@ namespace Netz
     if (result > 0)
       for (int i = ReactorOps::max_ops - 1; i >= 0; --i)
         for (std::size_t j = 0; j < fds[i].fd_count; ++j)
-          if(!taskQueue[i].empty())
-            for (auto& rOp : taskQueue[i][fds[i].fd_array[j]])
-              rOp->RunOperation(ec);
+          for (auto it = taskQueue[i][fds[i].fd_array[j]].begin(); it != taskQueue[i][fds[i].fd_array[j]].end();)
+          {
+            auto rOp = *it;
+            rOp->RunOperation(ec);
+            delete rOp;
+            it = taskQueue[i][fds[i].fd_array[j]].erase(it);
+          }
   }
 
   void Reactor::Stop()

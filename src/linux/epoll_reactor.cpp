@@ -8,9 +8,11 @@ namespace Netz
 
 Reactor::Reactor()
 {
-  epoll_fd = epoll_create(20000);
+  epoll_fd = epoll_create1(0);
   if (epoll_fd != INVALID_SOCKET)
     ::fcntl(epoll_fd, F_SETFD, FD_CLOEXEC);
+  else
+    PrintError("epoll_create failed");
 }
 
 Reactor::~Reactor()
@@ -26,14 +28,25 @@ void Reactor::RegisterDescriptor(int type, ReactorOperation* op)
     return;
 
   auto it = taskQueue[type].emplace(std::piecewise_construct, std::forward_as_tuple(op->descriptor), std::forward_as_tuple());
-  it.first->second.push_back(op);
+  if (it.second)
+  {
+    epoll_event ev = { 0,{ 0 } };
+    ev.events = EPOLLIN | EPOLLERR | EPOLLHUP | EPOLLPRI | EPOLLET;
+    ev.data.ptr = op;
+    int result = epoll_ctl(epoll_fd, EPOLL_CTL_ADD, op->descriptor, &ev);
+    if (result != 0)
+      PrintError("Failed to add descriptor to epoll.");
+  }
+  else if (it.first->second.empty())
+  {
+    epoll_event ev = { 0,{ 0 } };
+    if (type == ReactorOps::write)
+      ev.events |= EPOLLOUT;
 
-  epoll_event ev = { 0,{ 0 } };
-  ev.events = EPOLLIN | EPOLLERR | EPOLLHUP | EPOLLPRI | EPOLLET;
-  ev.data.ptr = op;
-  int result = epoll_ctl(epoll_fd, EPOLL_CTL_ADD, op->descriptor, &ev);
-  if (result != 0)
-    PrintError("Failed to add descriptor to epoll.");
+    ev.data.ptr = op;
+    epoll_ctl(epoll_fd, EPOLL_CTL_MOD, op->descriptor, &ev);
+  }
+  it.first->second.push_back(op);
 }
 
 void Reactor::CancelDescriptor(SocketHandle fd)
@@ -58,6 +71,35 @@ void Reactor::CancelDescriptor(SocketHandle fd)
     }
   }
 }
+
+void Reactor::Run(int timeout)
+{
+  std::error_code ec;
+  epoll_event events[128];
+  std::vector<ReactorOperation*> readyOps;
+
+  int num_events = epoll_wait(epoll_fd, events, 128, timeout);
+
+  for (int i = 0; i < num_events; ++i)
+  {
+    if (events[i].events & (EPOLLIN | EPOLLOUT | EPOLLPRI | EPOLLERR | EPOLLHUP))
+    {
+      void* ptr = events[i].data.ptr;
+      auto op = static_cast<ReactorOperation*>(ptr);
+      readyOps.push_back(op);
+    }
+  }
+
+  for (int i = ReactorOps::max_ops - 1; i >= 0; --i)
+    for (std::size_t j = 0; j < readyOps.size(); ++j)
+      for (auto it = taskQueue[i][readyOps[j]->descriptor].begin(); it != taskQueue[i][readyOps[j]->descriptor].end();)
+      {
+        auto rOp = *it;
+        rOp->RunOperation(ec);
+        delete rOp;
+        it = taskQueue[i][readyOps[j]->descriptor].erase(it);
+      }
+} 
 
 }
 #endif

@@ -1,5 +1,4 @@
-#ifndef EPOLL_REACTOR_H
-#define EPOLL_REACTOR_H
+#pragma once
 
 namespace Netz
 {
@@ -11,7 +10,7 @@ namespace Netz
 
     virtual void RegisterDescriptor(int type, ReactorOperation* op) override;
     virtual void CancelDescriptor(SocketHandle fd) override;
-    void Run(int timeout) { }
+    void Run(int timeout);
     void Stop() { shutdown = true; }
     bool IsRunning() const { return !shutdown; }
   private:
@@ -21,4 +20,3 @@ namespace Netz
   };
 }
 
-#endif
