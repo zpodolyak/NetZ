@@ -29,6 +29,7 @@ void OnSend(int bytes_transferred, const std::error_code& ec)
   {
     DebugMessage("successfully sent %d bytes", bytes_transferred);
   }
+  rtor.Stop();
 }
 
 int main(int argc, char* argv[])

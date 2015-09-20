@@ -13,10 +13,7 @@ namespace Netz
     virtual void CompleteOperation(ReactorOperation* op) override
     {
       if (op)
-      {
         op->CompleteOperation();
-        // TODO: cancel operation
-      }
     }
 
     void Run(int timeout);

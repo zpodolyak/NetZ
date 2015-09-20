@@ -21,6 +21,7 @@ void OnReceive(int bytes_transferred, const std::error_code& ec)
     SampleRecord rec;
     rec.Load(dataBuffer);
     rec.DumpRecord();
+    rtor.Stop();
   }
 }
 

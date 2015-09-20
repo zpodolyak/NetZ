@@ -81,7 +81,6 @@ namespace Netz
           service->RegisterDescriptorOperation(ReactorOps::connect, op);
         }
       }
-      service->CompleteOperation(op);
     }
 
     void Close();

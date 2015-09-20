@@ -10,7 +10,7 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif ()
 
 if (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_CLANGXX)
-  add_definitions(-std=c++14
+  add_definitions(-std=c++11
                   -Wall
                   -Werror
                   -g

@@ -45,7 +45,7 @@ struct SampleRecord
     }
   }
 
-  auto MessageLength() const
+  int MessageLength() const
   {
     return sizeof(int) + sizeof(std::size_t) + name.length();
   }
