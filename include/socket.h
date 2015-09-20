@@ -28,6 +28,7 @@ namespace Netz
     SocketBase& operator=(const SocketBase&) = delete;
 
     SocketBase();
+    SocketBase(SocketService* _service);
 
     template <typename ProtocolType>
     SocketBase(const ProtocolType& prot)
@@ -71,14 +72,16 @@ namespace Netz
       if (socket == INVALID_SOCKET || !socketAddress || !service)
         return;
 
+      auto op = new ConnectOperation(socketAddress, socket, std::forward<Handler>(handler));
       if (ErrorWrapper(::connect(socket, (const sockaddr*)socketAddress, sizeof(sockaddr_in)), ec) != 0)
       {
         if (ec == std::errc::operation_in_progress
           || ec == std::errc::operation_would_block)
         {
-          service->RegisterDescriptor(ReactorOps::connect, new ConnectOperation(socketAddress, socket, std::forward<Handler>(handler)));
+          service->RegisterDescriptorOperation(ReactorOps::connect, op);
         }
       }
+      service->CompleteOperation(op);
     }
 
     void Close();
@@ -102,6 +105,7 @@ namespace Netz
 
     SocketHandle socket;
     SocketService* service = nullptr;
+    bool isNonBlocking = false;
   };
 
   template <typename ProtocolType>

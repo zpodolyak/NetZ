@@ -15,7 +15,7 @@ namespace Netz
     Stop();
   }
 
-  void Reactor::RegisterDescriptor(int type, ReactorOperation* op)
+  void Reactor::RegisterDescriptorOperation(int type, ReactorOperation* op)
   {
     if (!(type < ReactorOps::max_ops) && op->descriptor == INVALID_SOCKET)
       return;

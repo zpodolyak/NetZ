@@ -9,9 +9,7 @@ namespace Netz
 Reactor::Reactor()
 {
   epoll_fd = epoll_create1(0);
-  if (epoll_fd != INVALID_SOCKET)
-    ::fcntl(epoll_fd, F_SETFD, FD_CLOEXEC);
-  else
+  if (epoll_fd == INVALID_SOCKET)
     PrintError("epoll_create failed");
 }
 
@@ -22,28 +20,25 @@ Reactor::~Reactor()
     close(epoll_fd);
 }
 
-void Reactor::RegisterDescriptor(int type, ReactorOperation* op)
+void Reactor::RegisterDescriptorOperation(int type, ReactorOperation* op)
 {
   if (!(type < ReactorOps::max_ops) && op->descriptor == INVALID_SOCKET)
     return;
 
+  epoll_event ev = { 0,{ 0 } };
+  ev.data.ptr = op;
   auto it = taskQueue[type].emplace(std::piecewise_construct, std::forward_as_tuple(op->descriptor), std::forward_as_tuple());
   if (it.second)
   {
-    epoll_event ev = { 0,{ 0 } };
     ev.events = EPOLLIN | EPOLLERR | EPOLLHUP | EPOLLPRI | EPOLLET;
-    ev.data.ptr = op;
     int result = epoll_ctl(epoll_fd, EPOLL_CTL_ADD, op->descriptor, &ev);
     if (result != 0)
       PrintError("Failed to add descriptor to epoll.");
   }
-  else if (it.first->second.empty())
+  if (it.first->second.empty())
   {
-    epoll_event ev = { 0,{ 0 } };
     if (type == ReactorOps::write)
       ev.events |= EPOLLOUT;
-
-    ev.data.ptr = op;
     epoll_ctl(epoll_fd, EPOLL_CTL_MOD, op->descriptor, &ev);
   }
   it.first->second.push_back(op);

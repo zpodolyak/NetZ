@@ -16,6 +16,11 @@ namespace Netz
     {
     }
 
+    StreamSocket(SocketService* _service)
+      : SocketBase(_service)
+    {
+    }
+
     StreamSocket(const protocol_type& prot)
       : SocketBase(prot)
     {
@@ -41,7 +46,7 @@ namespace Netz
     {
       if (socket == INVALID_SOCKET || !service)
         return;
-      service->RegisterDescriptor(ReactorOps::write, new SendOperation(buffer, length, msg_flags, socket, std::forward<Handler>(handler)));
+      service->RegisterDescriptorOperation(ReactorOps::write, new SendOperation(buffer, length, msg_flags, socket, std::forward<Handler>(handler)));
     }
 
     int Receive(char* buffer, int length, int msg_flags = 0)
@@ -60,7 +65,7 @@ namespace Netz
     {
       if (socket == INVALID_SOCKET || !service)
         return;
-      service->RegisterDescriptor(ReactorOps::read, new ReceiveOperation(buffer, length, msg_flags, socket, std::forward<Handler>(handler)));
+      service->RegisterDescriptorOperation(ReactorOps::read, new ReceiveOperation(buffer, length, msg_flags, socket, std::forward<Handler>(handler)));
     }
   };
 

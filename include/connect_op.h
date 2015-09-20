@@ -22,7 +22,7 @@ namespace Netz
     {
       if (descriptor == INVALID_SOCKET || !socketAddress)
         return;
-      ErrorWrapper(::connect(descriptor, (const sockaddr*)socketAddress, sizeof(sockaddr_in)), _ec);
+      // do nothing for now; may be worth checking if connection really succeeded
     }
 
     virtual void CompleteOperation() override

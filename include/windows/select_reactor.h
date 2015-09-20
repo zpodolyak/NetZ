@@ -8,8 +8,17 @@ namespace Netz
     Reactor();
     ~Reactor();
 
-    virtual void RegisterDescriptor(int type, ReactorOperation* op) override;
+    virtual void RegisterDescriptorOperation(int type, ReactorOperation* op) override;
     virtual void CancelDescriptor(SocketHandle fd) override;
+    virtual void CompleteOperation(ReactorOperation* op) override
+    {
+      if (op)
+      {
+        op->CompleteOperation();
+        // TODO: cancel operation
+      }
+    }
+
     void Run(int timeout);
     void Stop();
     bool IsRunning() const { return !shutdown; }
