@@ -6,6 +6,11 @@
 namespace Netz
 {
 
+namespace
+{
+  std::vector<ReactorOperation*> cleanupOpsOnExit;
+}
+
 Reactor::Reactor()
 {
   epoll_fd = epoll_create1(0);
@@ -18,6 +23,8 @@ Reactor::~Reactor()
   Stop();
   if (epoll_fd != INVALID_SOCKET)
     close(epoll_fd);
+  for (auto it : cleanupOpsOnExit)
+    delete it;
 }
 
 void Reactor::RegisterDescriptorOperation(int type, ReactorOperation* op)
@@ -91,7 +98,7 @@ void Reactor::Run(int timeout)
       {
         auto rOp = *it;
         rOp->RunOperation(ec);
-        delete rOp;
+        cleanupOpsOnExit.push_back(rOp);
         it = taskQueue[i][readyOps[j]->descriptor].erase(it);
       }
 } 

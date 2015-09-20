@@ -75,8 +75,8 @@ namespace Netz
       auto op = new ConnectOperation(socketAddress, socket, std::forward<Handler>(handler));
       if (ErrorWrapper(::connect(socket, (const sockaddr*)socketAddress, sizeof(sockaddr_in)), ec) != 0)
       {
-        if (ec == std::errc::operation_in_progress
-          || ec == std::errc::operation_would_block)
+        if (ec == std::error_code((int)std::errc::operation_in_progress, std::system_category())
+          || ec == std::error_code((int)std::errc::operation_would_block, std::system_category()))
         {
           service->RegisterDescriptorOperation(ReactorOps::connect, op);
         }
