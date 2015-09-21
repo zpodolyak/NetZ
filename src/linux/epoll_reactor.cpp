@@ -23,8 +23,9 @@ Reactor::~Reactor()
   Stop();
   if (epoll_fd != INVALID_SOCKET)
     close(epoll_fd);
-  for (auto it : cleanupOpsOnExit)
-    delete it;
+  for (auto op : cleanupOpsOnExit)
+    delete op;
+  cleanupOpsOnExit.clear();
 }
 
 void Reactor::RegisterDescriptorOperation(int type, ReactorOperation* op)

@@ -35,8 +35,13 @@ namespace Netz
     {
       std::error_code ec;
       int bytes = ErrorWrapper(::send(socket, buffer, length, msg_flags), ec);
-      if (ec == std::errc::operation_would_block
-        || ec == std::errc::resource_unavailable_try_again)
+#ifndef WIN32
+      if (ec == std::error_code((int)std::errc::resource_unavailable_try_again, std::system_category())
+        || ec == std::error_code((int)std::errc::operation_would_block, std::system_category()))
+#else
+      if (ec == std::errc::resource_unavailable_try_again
+        || ec == std::errc::operation_would_block)
+#endif
         return SOCKET_ERROR;
       return bytes;
     }
@@ -53,8 +58,13 @@ namespace Netz
     {
       std::error_code ec;
       int bytes = ErrorWrapper(::recv(socket, buffer, length, msg_flags), ec);
-      if (ec == std::errc::operation_would_block
-        || ec == std::errc::resource_unavailable_try_again)
+#ifndef WIN32
+      if (ec == std::error_code((int)std::errc::resource_unavailable_try_again, std::system_category())
+        || ec == std::error_code((int)std::errc::operation_would_block, std::system_category()))
+#else
+      if (ec == std::errc::resource_unavailable_try_again
+        || ec == std::errc::operation_would_block)
+#endif
         return SOCKET_ERROR;
       return bytes;
     }
