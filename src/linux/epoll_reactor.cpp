@@ -3,13 +3,23 @@
 #ifdef HAS_EPOLL
 #include "linux/epoll_reactor.h"
 
-namespace Netz
-{
-
 namespace
 {
-  std::vector<ReactorOperation*> cleanupOpsOnExit;
+  struct ReactorOpsCleanup
+  {
+    std::vector<Netz::ReactorOperation*> cl;
+
+    ~ReactorOpsCleanup()
+    {
+      for (auto op : cl)
+        delete op;
+      cl.clear();
+    }
+  };
 }
+
+namespace Netz
+{
 
 Reactor::Reactor()
 {
@@ -23,9 +33,6 @@ Reactor::~Reactor()
   Stop();
   if (epoll_fd != INVALID_SOCKET)
     close(epoll_fd);
-  for (auto op : cleanupOpsOnExit)
-    delete op;
-  cleanupOpsOnExit.clear();
 }
 
 void Reactor::RegisterDescriptorOperation(int type, ReactorOperation* op)
@@ -80,6 +87,7 @@ void Reactor::Run(int timeout)
   std::error_code ec;
   epoll_event events[128];
   std::vector<ReactorOperation*> readyOps;
+  ReactorOpsCleanup cleanupOps;
 
   int num_events = epoll_wait(epoll_fd, events, 128, timeout);
 
@@ -99,7 +107,7 @@ void Reactor::Run(int timeout)
       {
         auto rOp = *it;
         rOp->RunOperation(ec);
-        cleanupOpsOnExit.push_back(rOp);
+        cleanupOps.cl.push_back(rOp);
         it = taskQueue[i][readyOps[j]->descriptor].erase(it);
       }
 } 
