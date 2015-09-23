@@ -1,9 +1,7 @@
 cmake_minimum_required (VERSION 2.8)
-project(netz)
+project(NetZ)
 
 option(BUILD_TESTS "Build unit tests" OFF)
-
-include_directories(include)
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   set(CMAKE_COMPILER_IS_CLANGXX 1)
@@ -29,41 +27,26 @@ endif ()
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
 
-file(GLOB LIB_SOURCES "${CMAKE_SOURCE_DIR}/src/*.cpp")
-
 if (CMAKE_SYSTEM_NAME MATCHES ".*Linux")
-  set(PLATFORM_DIR src/linux/)
   set(THREAD_LIB pthread)
   set(TEST_LIB ${CMAKE_SOURCE_DIR}/external/gmock/lib/libgmock.a)
   set(TEST_LIB_DEBUG ${CMAKE_SOURCE_DIR}/external/gmock/lib/libgmock.a)
   add_definitions(-DPLATFORM_LINUX)
 elseif (WIN32)
-  set(PLATFORM_DIR src/windows/)
   add_definitions(-DPLATFORM_WINDOWS -D_CRT_SECURE_NO_WARNINGS)
   set(TEST_LIB ${CMAKE_SOURCE_DIR}/external/gmock/lib/release/gmock.lib)
   set(TEST_LIB_DEBUG ${CMAKE_SOURCE_DIR}/external/gmock/lib/debug/gmock.lib)
-  file(GLOB HEADERS "${CMAKE_SOURCE_DIR}/include/*h" "${CMAKE_SOURCE_DIR}/include/windows/*h")
-  source_group("include" FILES ${HEADERS})
-  source_group("src" FILES ${LIB_SOURCES})
 else ()
   message(FATAL_ERROR "Unsupported platform! Exiting.")
 endif ()
 
-file(GLOB PLATFORM_LIB_SOURCES "${PLATFORM_DIR}/*.cpp")
-
-add_library(netz STATIC ${HEADERS} ${LIB_SOURCES} ${PLATFORM_LIB_SOURCES})
-
 if (MSVC)
-  source_group("src\\windows" FILES ${PLATFORM_LIB_SOURCES})
   add_definitions(/wd4068 /wd4669)
 endif ()
 
-add_executable(example_tcp_server src/examples/example_tcp_server.cpp)
-target_link_libraries(example_tcp_server netz)
-
-add_executable(example_tcp_client src/examples/example_tcp_client.cpp)
-target_link_libraries(example_tcp_client netz)
+add_subdirectory(libraries/network)
+add_subdirectory(projects)
 
 if (BUILD_TESTS)
-  add_subdirectory(test)
+  add_subdirectory(tests)
 endif ()
