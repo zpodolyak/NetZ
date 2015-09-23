@@ -7,7 +7,7 @@ namespace
 {
   struct ReactorOpsCleanup
   {
-    std::vector<Netz::ReactorOperation*> cl;
+    std::vector<NetZ::ReactorOperation*> cl;
 
     ~ReactorOpsCleanup()
     {
@@ -18,7 +18,7 @@ namespace
   };
 }
 
-namespace Netz
+namespace NetZ
 {
 
 Reactor::Reactor()

@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Netz
+namespace NetZ
 {
   class Reactor : public SocketService
   {

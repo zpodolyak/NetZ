@@ -1,6 +1,6 @@
 #include "common.h"
 
-namespace Netz
+namespace NetZ
 {
   namespace SocketPlatform
   {
