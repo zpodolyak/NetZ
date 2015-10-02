@@ -2,3 +2,13 @@
 Makefile
 CMakeFiles
 CMakeCache.txt
+
+# Visual Studio ignores
+.vs/
+*.vcxproj
+*.filters
+*.sln
+*.sdf
+*.opensdf
+Debug/
+Release/

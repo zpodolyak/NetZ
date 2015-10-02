@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common.h"
+#include "libraries/common.h"
 
 namespace NetZ
 {

@@ -1,4 +1,5 @@
-#include "libraries/network/include/common.h"
+#include "libraries/common.h"
+#include "libraries/network/include/network.h"
 #include "example_helper.h"
 
 using NetZ::Protocol;

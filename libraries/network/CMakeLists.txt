@@ -1,10 +1,4 @@
-include_directories(include)
-
-if (CMAKE_SYSTEM_NAME MATCHES ".*Linux")
-  set(PLATFORM_DIR linux)
-elseif (WIN32)
-  set(PLATFORM_DIR windows)
-endif()
+include_directories(${CMAKE_SOURCE_DIR} include)
 
 file(GLOB HEADERS "include/*.h")
 file(GLOB LIB_SOURCES "src/*.cpp")

@@ -1,4 +1,5 @@
-#include "common.h"
+#include "libraries/common.h"
+#include "network.h"
 
 #ifdef WIN32
 # pragma comment(lib, "ws2_32.lib")

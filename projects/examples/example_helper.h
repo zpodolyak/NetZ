@@ -1,6 +1,6 @@
 #pragma once
 
-#include "libraries/network/include/common.h"
+#include "libraries/common.h"
 
 struct SampleRecord
 {
