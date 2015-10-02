@@ -1,5 +1,4 @@
-#ifndef ADDRESS_H
-#define ADDRESS_H
+#pragma once
 
 namespace NetZ
 {
@@ -24,4 +23,3 @@ namespace NetZ
   typedef AddressV4 Address;
 }
 
-#endif

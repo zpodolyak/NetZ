@@ -1,7 +1,8 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "libraries/network/include/common.h"
+#include "libraries/common.h"
+#include "network.h"
 
 TEST(ContrivedExampleTest, CreateSocket)
 {

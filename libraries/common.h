@@ -1,5 +1,4 @@
-#ifndef COMMON_H
-#define COMMON_H
+#pragma once
 
 // std includes
 #include <vector>
@@ -50,18 +49,4 @@ typedef SOCKET SocketHandle;
 #endif
 
 #include "utils.h"
-#include "socket_service.h"
-#include "reactor.h"
-#include "address.h"
-#include "protocol.h"
-#include "connection_data.h"
-#include "accept_op.h"
-#include "connect_op.h"
-#include "send_op.h"
-#include "receive_op.h"
-#include "socket_platform.h"
-#include "socket.h"
-#include "stream_socket.h"
-#include "server_socket.h"
 
-#endif

@@ -1,4 +1,5 @@
-#include "common.h"
+#include "libraries/common.h"
+#include "network.h"
 
 namespace NetZ
 {
