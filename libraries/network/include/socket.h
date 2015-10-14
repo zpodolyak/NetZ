@@ -28,6 +28,7 @@ namespace NetZ
     SocketBase& operator=(const SocketBase&) = delete;
 
     SocketBase();
+    SocketBase(SocketBase&&) = default;
     SocketBase(SocketService* _service);
 
     template <typename ProtocolType>

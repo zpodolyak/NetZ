@@ -2,6 +2,7 @@
 
 // std includes
 #include <vector>
+#include <set>
 #include <deque>
 #include <memory>
 #include <string>
