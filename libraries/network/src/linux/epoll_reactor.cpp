@@ -1,4 +1,5 @@
-#include "common.h"
+#include "libraries/common.h"
+#include "libraries/network/include/network.h"
 
 #ifdef HAS_EPOLL
 #include "linux/epoll_reactor.h"

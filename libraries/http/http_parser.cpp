@@ -24,11 +24,6 @@ namespace Http
         return true;
       }
 
-      bool IsAlphaNumeric(unsigned char c)
-      {
-        return ('0' <= c && (c <= '9' || (('a' | 0x20) <= (c | 0x20) && (c | 0x20) <= ('z' | 0x20))));
-      }
-
       const char crlf[] = { '\r', '\n' };
     }
 
@@ -91,7 +86,7 @@ namespace Http
 
       while (*p == ' ' || *p == '\t') ++p;
       const char* start = p;
-      while (31 < *p && *p != 127 || *p == '\t') ++p;
+      while ((31 < *p && *p != 127) || *p == '\t') ++p;
       header.second.assign(start, p - start);
 
       if (*p++ != crlf[0] && *p != crlf[1])

@@ -13,8 +13,8 @@ namespace Http
 
     InputBuffer(const char* bufferData, std::size_t length)
       : buffer(bufferData, bufferData + length)
-      , offset(Start())
       , sc(HttpStatusCode::ok)
+      , offset(Start())
     {
     }
 
