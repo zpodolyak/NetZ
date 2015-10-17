@@ -16,7 +16,6 @@ namespace Http
     HttpConnection(TcpSocket _socket);
   private:
     TcpSocket socket;
-    HttpParser parser;
     HttpMessageRequest request;
     HttpMessageResponse response;
   };

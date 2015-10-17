@@ -12,8 +12,8 @@ namespace Http
 
   struct HttpMessage
   {
-    int versionMajor;
-    int versionMinor;
+    int versionMajor = -1;
+    int versionMinor = -1;
     std::vector<Header> headers;
   };
 
