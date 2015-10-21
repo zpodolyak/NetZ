@@ -4,11 +4,13 @@ include_directories(${CMAKE_SOURCE_DIR}
 
 set(TEST_SOURCES
     network/test_socket.cpp
+    http/test_http_parser.cpp
     main.cpp )
     
 if (MSVC)
   source_group("src" FILES "main.cpp")
   source_group("src\\network" FILES "network/test_socket.cpp")
+  source_group("src\\http" FILES "http/test_http_parser.cpp")
 endif ()
 
 add_executable(tests ${TEST_SOURCES})

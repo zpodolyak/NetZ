@@ -23,5 +23,5 @@ int main(int argc, char** argv)
 #ifdef PLATFORM_LINUX
 # include "libraries/network/src/linux/socket_linux.cpp"
 #else
-# include "../src/windows/socket_windows.cpp"
+# include "libraries/network/src/windows/socket_windows.cpp"
 #endif
