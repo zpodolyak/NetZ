@@ -25,12 +25,29 @@ namespace Http
     {
       return std::string(buffer.data(), buffer.size());
     }
+
+    void Append(const char* bufferData, std::size_t length)
+    {
+      buffer.insert(std::end(buffer), bufferData, bufferData + length);
+    }
+
+    void SetBuffer(const char* bufferData, std::size_t length)
+    {
+      buffer.assign(bufferData, bufferData + length);
+      Reset();
+    }
+
+    void Reset()
+    {
+      offset = Start();
+      sc = HttpStatusCode::ok;
+    }
   };
 
   namespace HttpParser
   {
-    void ParseRequest(InputBuffer& buffer, HttpMessageRequest& request);
-    bool ParseNextHeader(InputBuffer& buffer, Header& header);
+    bool ParseRequestLine(InputBuffer& buffer, HttpMessageRequest& request);
+    bool ParseNextHeader(InputBuffer& buffer, HttpMessage& message);
   };
 }
 }
