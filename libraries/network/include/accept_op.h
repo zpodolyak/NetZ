@@ -4,11 +4,11 @@
 
 namespace NetZ
 {
-  template <typename SocketType>
+  template <typename SocketType, typename Handler>
   class AcceptOperation : public ReactorOperation
   {
   public:
-    AcceptOperation(SocketType& _peer, ConnectionData* conn, SocketHandle fd, AcceptCompletionHandler<SocketType> _handler)
+    AcceptOperation(SocketType& _peer, ConnectionData* conn, SocketHandle fd, CompletionHandler<Handler> _handler)
       : ReactorOperation(fd, [this](std::error_code& _ec)
     {
       DoAccept(_ec);
@@ -41,14 +41,13 @@ namespace NetZ
 
     virtual void CompleteOperation() override
     {
-      if (handler)
-        handler(peer, ec);
+      handler(ec);
     }
 
   private:
     SocketType& peer;
     ConnectionData* connData;
-    AcceptCompletionHandler<SocketType> handler;
+    CompletionHandler<Handler> handler;
   };
 }
 

@@ -4,10 +4,11 @@
 
 namespace NetZ
 {
+  template <typename Handler>
   class ConnectOperation : public ReactorOperation
   {
   public:
-    ConnectOperation(const sockaddr_in* conn, SocketHandle fd, CompletionHandler _handler)
+    ConnectOperation(const sockaddr_in* conn, SocketHandle fd, CompletionHandler<Handler> _handler)
       : ReactorOperation(fd, [this](std::error_code& _ec)
     {
       DoConnect(_ec);
@@ -27,12 +28,11 @@ namespace NetZ
 
     virtual void CompleteOperation() override
     {
-      if (handler)
-        handler(ec);
+      handler(ec);
     }
 
   private:
     const sockaddr_in* socketAddress = nullptr;
-    CompletionHandler handler;
+    CompletionHandler<Handler> handler;
   };
 }

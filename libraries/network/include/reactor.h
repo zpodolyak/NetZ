@@ -11,35 +11,46 @@ namespace NetZ
     connect = write
   };
 
+  template <typename Callback>
+  struct CompletionHandler
+  {
+    CompletionHandler(Callback _cb)
+      : cb(_cb)
+    {}
+
+    template <typename... TArgs>
+    void operator()(TArgs&&... args)
+    {
+      cb(std::forward<TArgs>(args)...);
+    }
+    Callback cb;
+  };
+
   const int REACTOR_QUEUES_SIZE = 3;
 
   using RunHandler = std::function<void(std::error_code&)>;
-  using CompletionHandler = void(*)(const std::error_code&);
-  using DataCompletionHandler = void(*)(int, const std::error_code&);
-  template <typename SocketType>
-  using AcceptCompletionHandler = std::function<void(SocketType&, const std::error_code&)>;
-
+ 
   class ReactorOperation
   {
     friend class Reactor;
   public:
     ReactorOperation(SocketHandle fd, RunHandler rFunc)
       : descriptor(fd)
-      , run(std::move(rFunc))
+      , runFunc(std::move(rFunc))
     {}
     ReactorOperation(const ReactorOperation&) = default;
     virtual ~ReactorOperation() {}
 
     void RunOperation(std::error_code& ec_)
     {
-      run(ec_);
+      runFunc(ec_);
       CompleteOperation();
     }
 
     virtual void CompleteOperation() {}
   protected:
     SocketHandle descriptor;
-    RunHandler run;
+    RunHandler runFunc;
     std::error_code ec;
   };
 }

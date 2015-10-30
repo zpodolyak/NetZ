@@ -25,13 +25,13 @@ inline int ErrorWrapper(int return_value, std::error_code& ec)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wformat-security"
 
-template <typename... Targs>
-inline void DebugMessage(const char* format, Targs&&... args)
+template <typename... TArgs>
+inline void DebugMessage(const char* format, TArgs&&... args)
 {
 #ifdef DEBUG
-  int sz = std::snprintf(nullptr, 0, format, std::forward<Targs>(args)...);
+  int sz = std::snprintf(nullptr, 0, format, std::forward<TArgs>(args)...);
   std::vector<char> buff(sz + 1);
-  std::snprintf(&buff[0], buff.size(), format, std::forward<Targs>(args)...);
+  std::snprintf(&buff[0], buff.size(), format, std::forward<TArgs>(args)...);
   std::printf("%s\n", buff.data());
 #endif
 }

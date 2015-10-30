@@ -73,7 +73,7 @@ namespace NetZ
       if (socket == INVALID_SOCKET || !socketAddress || !service)
         return;
 
-      auto op = new ConnectOperation(socketAddress, socket, std::forward<Handler>(handler));
+      auto op = new ConnectOperation<Handler>(socketAddress, socket, std::forward<Handler>(handler));
       if (ErrorWrapper(::connect(socket, (const sockaddr*)socketAddress, sizeof(sockaddr_in)), ec) != 0)
       {
 #ifndef WIN32

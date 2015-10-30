@@ -4,10 +4,11 @@
 
 namespace NetZ
 {
+  template <typename Handler>
   class ReceiveOperation : public ReactorOperation
   {
   public:
-    ReceiveOperation(char* buff, int len, int msg_flags, SocketHandle fd, DataCompletionHandler _handler)
+    ReceiveOperation(char* buff, int len, int msg_flags, SocketHandle fd, CompletionHandler<Handler> _handler)
       : ReactorOperation(fd, [this](std::error_code& _ec)
     {
       DoReceive(_ec);
@@ -30,15 +31,14 @@ namespace NetZ
 
     virtual void CompleteOperation() override
     {
-      if (handler)
-        handler(bytes_transferred, ec);
+      handler(bytes_transferred, ec);
     }
 
   private:
     char* buffer = nullptr;
     int length, flags, bytes_transferred;
     SocketHandle desc;
-    DataCompletionHandler handler;
+    CompletionHandler<Handler> handler;
   };
 }
 

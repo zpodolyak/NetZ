@@ -16,7 +16,7 @@ namespace NetZ
         op->CompleteOperation();
     }
 
-    void Run(int timeout);
+    void Run(int timeout = 200);
     void Stop();
     bool IsRunning() const { return !shutdown; }
   private:
