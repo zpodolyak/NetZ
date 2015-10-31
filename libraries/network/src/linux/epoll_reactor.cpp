@@ -70,7 +70,7 @@ void Reactor::CancelDescriptor(SocketHandle fd)
       while (!it->second.empty())
       {
         auto op = it->second.front();
-        op->ec = std::make_error_code(std::errc::operation_canceled);
+        //auto ec = std::make_error_code(std::errc::operation_canceled);
 
         epoll_event ev = { 0,{ 0 } };
         epoll_ctl(epoll_fd, EPOLL_CTL_DEL, op->descriptor, &ev);

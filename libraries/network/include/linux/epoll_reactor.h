@@ -10,11 +10,6 @@ namespace NetZ
 
     virtual void RegisterDescriptorOperation(int type, ReactorOperation* op) override;
     virtual void CancelDescriptor(SocketHandle fd) override;
-    virtual void CompleteOperation(ReactorOperation* op) override
-    {
-      if (op)
-        op->CompleteOperation();
-    }
 
     void Run(int timeout = 200);
     void Stop() { shutdown = true; }

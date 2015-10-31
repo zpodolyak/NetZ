@@ -9,27 +9,23 @@ namespace NetZ
   {
   public:
     ReceiveOperation(char* buff, int len, int msg_flags, SocketHandle fd, CompletionHandler<Handler> _handler)
-      : ReactorOperation(fd, [this](std::error_code& _ec)
-    {
-      DoReceive(_ec);
-    })
+      : ReactorOperation(fd, &ReceiveOperation::DoReceive)
       , buffer(buff)
       , length(len)
       , flags(msg_flags)
-      , desc(fd)
       , handler(std::move(_handler))
     {
 
     }
 
-    void DoReceive(std::error_code& _ec)
+    static void DoReceive(ReactorOperation* op, std::error_code& ec)
     {
-      if (desc == INVALID_SOCKET)
-        return;
-      bytes_transferred = ErrorWrapper(::recv(desc, buffer, length, flags), _ec);
+      ReceiveOperation* rcvOp(static_cast<ReceiveOperation*>(op));
+      rcvOp->bytes_transferred = ErrorWrapper(::recv(rcvOp->descriptor, rcvOp->buffer, rcvOp->length, rcvOp->flags), ec);
+      rcvOp->CompleteOperation(ec);
     }
 
-    virtual void CompleteOperation() override
+    void CompleteOperation(std::error_code& ec)
     {
       handler(bytes_transferred, ec);
     }

@@ -37,9 +37,18 @@
 typedef int SocketHandle;
 # define INVALID_SOCKET -1
 # define SOCKET_ERROR -1
+
+template <typename T, typename... Types>
+inline std::unique_ptr<T> make_unique(Types&&... args)
+{
+  return std::unique_ptr<T>(new T(std::forward<Types>(args)...));
+}
+
 #elif defined(WIN32)
 # include "windowsx.h"
 # include "ws2tcpip.h"
+
+using std::make_unique;
 
 #define NOMINMAX
 #define WIN32_LEAN_AND_MEAN

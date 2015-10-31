@@ -9,24 +9,19 @@ namespace NetZ
   {
   public:
     ConnectOperation(const sockaddr_in* conn, SocketHandle fd, CompletionHandler<Handler> _handler)
-      : ReactorOperation(fd, [this](std::error_code& _ec)
-    {
-      DoConnect(_ec);
-    })
+      : ReactorOperation(fd, &ConnectOperation::DoConnect)
       , socketAddress(conn)
       , handler(std::move(_handler))
     {
 
     }
 
-    void DoConnect(std::error_code& _ec)
+    static void DoConnect(ReactorOperation* op, std::error_code& ec)
     {
-      if (descriptor == INVALID_SOCKET || !socketAddress)
-        return;
-      // do nothing for now; may be worth checking if connection really succeeded
+      static_cast<ConnectOperation*>(op)->CompleteOperation(ec);
     }
 
-    virtual void CompleteOperation() override
+    void CompleteOperation(std::error_code& ec)
     {
       handler(ec);
     }

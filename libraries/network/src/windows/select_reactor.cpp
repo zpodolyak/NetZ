@@ -35,7 +35,7 @@ namespace NetZ
         while (!it->second.empty())
         {
           auto op = it->second.front();
-          op->ec = std::make_error_code(std::errc::operation_canceled);
+          // auto ec = std::make_error_code(std::errc::operation_canceled);
           delete it->second.front();
           it->second.pop_front();
         }

@@ -11,6 +11,7 @@ namespace Http
     : socket(std::move(_socket))
     , resource_mgr(rMgr)
   {
+    (void)resource_mgr;
     Read();
   }
 

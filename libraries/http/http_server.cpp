@@ -33,7 +33,7 @@ namespace Http
       if (!ec)
       {
         DebugMessage("received new connection!");
-        connections.insert(std::make_unique<HttpConnection>(std::move(clientSocket), &resource_mgr));
+        connections.insert(make_unique<HttpConnection>(std::move(clientSocket), &resource_mgr));
         StartAccepting();
       }
     });

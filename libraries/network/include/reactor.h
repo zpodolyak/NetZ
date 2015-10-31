@@ -27,31 +27,27 @@ namespace NetZ
   };
 
   const int REACTOR_QUEUES_SIZE = 3;
-
-  using RunHandler = std::function<void(std::error_code&)>;
  
   class ReactorOperation
   {
     friend class Reactor;
+    using RunHandler = void(*)(ReactorOperation*, std::error_code&);
   public:
     ReactorOperation(SocketHandle fd, RunHandler rFunc)
       : descriptor(fd)
       , runFunc(std::move(rFunc))
     {}
     ReactorOperation(const ReactorOperation&) = default;
-    virtual ~ReactorOperation() {}
+    ~ReactorOperation() {}
 
-    void RunOperation(std::error_code& ec_)
+    void RunOperation(std::error_code& ec)
     {
-      runFunc(ec_);
-      CompleteOperation();
+      runFunc(this, ec);
     }
 
-    virtual void CompleteOperation() {}
   protected:
     SocketHandle descriptor;
     RunHandler runFunc;
-    std::error_code ec;
   };
 }
 #if defined PLATFORM_LINUX && defined HAS_EPOLL

@@ -9,10 +9,7 @@ namespace NetZ
   {
   public:
     AcceptOperation(SocketType& _peer, ConnectionData* conn, SocketHandle fd, CompletionHandler<Handler> _handler)
-      : ReactorOperation(fd, [this](std::error_code& _ec)
-    {
-      DoAccept(_ec);
-    })
+      : ReactorOperation(fd, &AcceptOperation::DoAccept)
       , peer(_peer)
       , connData(conn)
       , handler(std::move(_handler))
@@ -20,9 +17,10 @@ namespace NetZ
 
     }
 
-    void DoAccept(std::error_code& _ec)
+    static void DoAccept(ReactorOperation* op, std::error_code& ec)
     {
-      if (descriptor == INVALID_SOCKET)
+      AcceptOperation* accOp(static_cast<AcceptOperation*>(op));
+      if (accOp->descriptor == INVALID_SOCKET)
         return;
 
 #ifdef WIN32
@@ -31,15 +29,16 @@ namespace NetZ
       std::size_t addrLen = 0;
 #endif
       sockaddr* addr = nullptr;
-      if (connData)
+      if (accOp->connData)
       {
-        addrLen = sizeof(connData->data);
-        addr = (sockaddr*)&connData->data;
+        addrLen = sizeof(accOp->connData->data);
+        addr = (sockaddr*)&accOp->connData->data;
       }
-      peer.Assign(ErrorWrapper(::accept(descriptor, addr, connData ? &addrLen : 0), ec));
+      accOp->peer.Assign(ErrorWrapper(::accept(accOp->descriptor, addr, accOp->connData ? &addrLen : 0), ec));
+      accOp->CompleteOperation(ec);
     }
 
-    virtual void CompleteOperation() override
+    void CompleteOperation(std::error_code& ec)
     {
       handler(ec);
     }

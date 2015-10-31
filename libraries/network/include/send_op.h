@@ -9,10 +9,7 @@ namespace NetZ
   {
   public:
     SendOperation(const char* buff, int len, int msg_flags, SocketHandle fd, CompletionHandler<Handler> _handler)
-      : ReactorOperation(fd, [this](std::error_code& _ec)
-    {
-      DoSend(_ec);
-    })
+      : ReactorOperation(fd, &SendOperation::DoSend)
       , buffer(buff)
       , length(len)
       , flags(msg_flags)
@@ -21,14 +18,14 @@ namespace NetZ
 
     }
 
-    void DoSend(std::error_code& _ec)
+    static void DoSend(ReactorOperation* op, std::error_code& ec)
     {
-      if (descriptor == INVALID_SOCKET)
-        return;
-      bytes_transferred = ErrorWrapper(::send(descriptor, buffer, length, flags), _ec);
+      SendOperation* sndOp(static_cast<SendOperation*>(op));
+      sndOp->bytes_transferred = ErrorWrapper(::send(sndOp->descriptor, sndOp->buffer, sndOp->length, sndOp->flags), ec);
+      sndOp->CompleteOperation(ec);
     }
 
-    virtual void CompleteOperation() override
+    void CompleteOperation(std::error_code& ec)
     {
       handler(bytes_transferred, ec);
     }
