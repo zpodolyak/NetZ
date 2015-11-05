@@ -26,6 +26,11 @@ namespace Http
       return std::string(buffer.data(), buffer.size());
     }
 
+    explicit operator const char*() const
+    {
+      return buffer.data();
+    }
+
     void Append(const char* bufferData, std::size_t length)
     {
       buffer.insert(std::end(buffer), bufferData, bufferData + length);
@@ -46,6 +51,12 @@ namespace Http
 
   namespace HttpParser
   {
+    enum class ParseState
+    {
+      RequestParsing,
+      HeaderParsing
+    };
+
     bool ParseRequestLine(InputBuffer& buffer, HttpMessageRequest& request);
     bool ParseNextHeader(InputBuffer& buffer, HttpMessage& message);
   };

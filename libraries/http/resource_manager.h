@@ -13,6 +13,7 @@ namespace Http
     ResourceManager();
     
     bool FindHttpResource(const HttpMessageRequest& request, HttpMessageResponse& response);
+    std::string GetDefaultReply(const HttpMessageResponse& response);
   };
 }
 }

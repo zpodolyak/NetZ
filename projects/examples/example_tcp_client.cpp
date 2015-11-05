@@ -45,7 +45,7 @@ int main(int argc, char* argv[])
     {
       SampleRecord smpl(1112, "NetZ Sample Send");
       smpl.Save(dataBuffer);
-      client.Send(dataBuffer, smpl.MessageLength(), 0, [&](int bytes_transferred, const std::error_code& ec)
+      client.Send(dataBuffer, smpl.MessageLength(), 0, [](int bytes_transferred, const std::error_code& ec)
       {
         if (bytes_transferred > 0 && !ec)
         {
