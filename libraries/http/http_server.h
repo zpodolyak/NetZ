@@ -4,6 +4,8 @@ namespace NetZ
 {
 namespace Http
 {
+  class HttpConnection;
+
   class HttpServer
   {
   public:
@@ -13,6 +15,7 @@ namespace Http
     HttpServer(const ConnectionData& conn);
     
     void Start();
+    void RemoveConnection(HttpConnection* conn);
   private:
     void StartAccepting();
 

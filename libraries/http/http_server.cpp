@@ -25,6 +25,19 @@ namespace Http
       reactor.Run();
   }
 
+  void HttpServer::RemoveConnection(HttpConnection* connection)
+  {
+    auto conn = std::begin(connections);
+    while (conn != std::end(connections))
+    {
+      if ((*conn).get() == connection)
+        conn = connections.erase(conn);
+      else
+        ++conn;
+    }
+    connection->Stop();
+  }
+
   void HttpServer::StartAccepting()
   {
     auto conn = svrSocket.LocalConnection();
@@ -33,7 +46,7 @@ namespace Http
       if (!ec)
       {
         DebugMessage("received new connection!");
-        connections.insert(make_unique<HttpConnection>(std::move(clientSocket), &resource_mgr));
+        connections.insert(make_unique<HttpConnection>(this, std::move(clientSocket), &resource_mgr));
         StartAccepting();
       }
     });

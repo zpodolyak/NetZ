@@ -7,5 +7,5 @@ if (MSVC)
   source_group("src" FILES ${HEADERS} ${LIB_SOURCES})
 endif()
 
-add_library(http STATIC ${HEADERS} ${LIB_SOURCES})
+add_library(http STATIC ${HEADERS} ${LIB_SOURCES} ../timer.cpp)
 
