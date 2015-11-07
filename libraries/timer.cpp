@@ -4,54 +4,58 @@ namespace NetZ
 {
 namespace Util
 {
-  SimpleTimer::SimpleTimer()
-    : running(false)
+  Timer::Timer()
+    : startInMs(0)
+    , periodMs(0)
+    , handler()
+    , state(TimerState::NotScheduled)
   {
   }
 
-  SimpleTimer::~SimpleTimer()
+  Timer::Timer(uint64_t startIn, uint64_t interval, Callback && _handler)
+    : startInMs(startIn)
+    , periodMs(interval)
+    , nextRun(std::chrono::steady_clock::now() + startInMs)
+    , handler(std::move(_handler))
+    , state(TimerState::Scheduled)
   {
-    running = false;
-  }
-  
-  void SimpleTimer::Wait(uint64_t starting, Callback&& handler)
-  {
-    std::this_thread::sleep_for(std::chrono::milliseconds(starting));
-    if (handler)
-      handler();
   }
 
-  void SimpleTimer::AsyncWait(uint64_t starting, Callback&& handler, uint64_t interval)
+  void Timer::Schedule(uint64_t startIn, uint64_t interval, Callback&& _handler)
   {
-    running = true;
+    startInMs = Milliseconds(startIn);
+    periodMs = Milliseconds(interval);
+    nextRun = std::chrono::steady_clock::now() + startInMs;
+    handler = std::move(_handler);
+    state = TimerState::Scheduled;
+  }
+
+  Timer::TimerState Timer::Run()
+  {
     if (!handler)
-      return;
-
-    std::thread([this, starting, handler, &interval]()
     {
-      auto next = std::chrono::steady_clock::now() + Milliseconds(starting);
-      std::condition_variable cond;
-      if (interval == 0)
+      state = TimerState::Error;
+      return state;
+    }
+
+    auto now = std::chrono::steady_clock::now();
+    if (now >= nextRun)
+    {
+      state = TimerState::Running;
+      handler();
+      if (periodMs > Milliseconds(0) && state != TimerState::Cancelled)
       {
-        std::this_thread::sleep_for(Milliseconds(starting));
-        handler();
+        nextRun = std::chrono::steady_clock::now() + periodMs;
+        state = TimerState::Scheduled;
       }
-      else while (running)
-      {
-        auto now = std::chrono::steady_clock::now();
-        if (now >= next)
-        {
-          handler();
-          next = now + Milliseconds(interval);
-        }
-        else cond.wait_until(std::unique_lock<std::mutex>(), next);
-      }
-    }).detach();
+      else state = TimerState::Finished;
+    }
+    return state;
   }
 
-  void SimpleTimer::Cancel()
+  void Timer::Cancel()
   {
-    running = false;
+    state = TimerState::Cancelled;
   }
 }
 }

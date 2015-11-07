@@ -1,5 +1,7 @@
 #pragma once
 
+#include "libraries/network/include/socket_service.h"
+
 namespace NetZ
 {
 namespace Http
@@ -16,13 +18,14 @@ namespace Http
     
     void Start();
     void RemoveConnection(HttpConnection* conn);
+    SocketService& GetSocketService() { return service; }
   private:
     void StartAccepting();
 
-    Reactor reactor;
     TcpServerSocket svrSocket;
     TcpSocket clientSocket;
     ResourceManager resource_mgr;
+    SocketService service;
     std::set<std::unique_ptr<HttpConnection>> connections;
   };
 }

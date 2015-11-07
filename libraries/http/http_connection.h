@@ -23,7 +23,7 @@ namespace Http
     HttpMessageRequest request;
     HttpMessageResponse response;
     ResourceManager* resource_mgr;
-    Util::SimpleTimer socketTimeout;
+    Util::Timer socketTimeout;
     void Read(HttpParser::ParseState state);
     void Write(const InputBuffer& buffer);
     void WriteDefaultResponse();

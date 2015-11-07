@@ -9,10 +9,10 @@ namespace NetZ
 namespace Http
 {
   HttpServer::HttpServer(const ConnectionData& conn)
-    : reactor()
-    , svrSocket(&reactor, ProtocolData<Protocol::TCP>(), conn)
-    , clientSocket(&reactor)
+    : svrSocket(&service, ProtocolData<Protocol::TCP>(), conn)
+    , clientSocket(&service)
     , resource_mgr()
+    , service()
   {
     svrSocket.SetNonBlocking(true);
     svrSocket.SetSocketOption(SocketOption (SOL_SOCKET, SO_REUSEADDR, 1));
@@ -21,8 +21,8 @@ namespace Http
 
   void HttpServer::Start()
   {
-    while (reactor.IsRunning())
-      reactor.Run();
+    while (service.IsRunning())
+      service.Run();
   }
 
   void HttpServer::RemoveConnection(HttpConnection* connection)

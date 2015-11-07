@@ -4,15 +4,15 @@
 
 using NetZ::Protocol;
 using NetZ::ProtocolData;
-using NetZ::Reactor;
+using NetZ::SocketService;
 using NetZ::ConnectionData;
 using NetZ::Address;
 using NetZ::TcpSocket;
 using NetZ::TcpServerSocket;
 
 char dataBuffer[1024];
-Reactor rtor;
-TcpSocket client(&rtor);
+SocketService service;
+TcpSocket client(&service);
 
 int main(int argc, char* argv[])
 {
@@ -20,7 +20,7 @@ int main(int argc, char* argv[])
   ProtocolData<Protocol::TCP> protocol;
 
   ConnectionData conn;
-  TcpServerSocket server(&rtor, protocol, conn);
+  TcpServerSocket server(&service, protocol, conn);
   server.SetNonBlocking(true);
   conn = server.LocalConnection();
   DebugMessage("waiting for connections on port %" PRIu16, conn.GetPort());
@@ -37,13 +37,13 @@ int main(int argc, char* argv[])
           SampleRecord rec;
           rec.Load(dataBuffer);
           rec.DumpRecord();
-          rtor.Stop();
+          service.Stop();
         }
       });
     }
   });
-  while (rtor.IsRunning())
-    rtor.Run();
+  while (service.IsRunning())
+    service.Run();
 
   NetZ::SocketPlatform::ShutdownPlatform();
   return 0;

@@ -4,12 +4,12 @@
 
 using NetZ::Protocol;
 using NetZ::ProtocolData;
-using NetZ::Reactor;
+using NetZ::SocketService;
 using NetZ::ConnectionData;
 using NetZ::Address;
 using NetZ::TcpSocket;
 
-Reactor rtor;
+SocketService service;
 bool connectionReady = false;
 char dataBuffer[1024];
 
@@ -17,7 +17,7 @@ int main(int argc, char* argv[])
 {
   NetZ::SocketPlatform::InitPlatform();
   ProtocolData<Protocol::TCP> protocol;
-  TcpSocket client(&rtor, protocol);
+  TcpSocket client(&service, protocol);
 
   if (argc == 3)
   {
@@ -38,9 +38,9 @@ int main(int argc, char* argv[])
   {
     DebugMessage("usage: example_client <host_ip> <port>");
   }
-  while (rtor.IsRunning())
+  while (service.IsRunning())
   {
-    rtor.Run();
+    service.Run();
     if (connectionReady)
     {
       SampleRecord smpl(1112, "NetZ Sample Send");
@@ -51,7 +51,7 @@ int main(int argc, char* argv[])
         {
           DebugMessage("successfully sent %d bytes", bytes_transferred);
         }
-        rtor.Stop();
+        service.Stop();
       });
       connectionReady = false;
     }

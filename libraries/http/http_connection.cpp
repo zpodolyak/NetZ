@@ -18,6 +18,7 @@ namespace Http
     , socketTimeout()
   {
     Read(HttpParser::ParseState::RequestParsing);
+    server->GetSocketService().AddTimer(socketTimeout);
   }
 
   void HttpConnection::Read(HttpParser::ParseState state)
@@ -64,11 +65,11 @@ namespace Http
   {
     socket.Send(static_cast<const char*>(data), data.buffer.size(), 0, [this](int bytes_transferred, const std::error_code& ec)
     {
-      socketTimeout.AsyncWait(timeoutDuration, [this]()
+      socketTimeout.Schedule(timeoutDuration, 0, 
+      [this]()
       {
         server->RemoveConnection(this);
-      }
-      , timeoutDuration);
+      });
       if (ec == std::errc::operation_canceled)
       {
         server->RemoveConnection(this);

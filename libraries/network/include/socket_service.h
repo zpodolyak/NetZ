@@ -1,14 +1,24 @@
 #pragma once
 
+#include "io_service.h"
+#include "reactor.h"
+#include "libraries/timer.h"
+
 namespace NetZ
 {
-  class ReactorOperation;
 
-  class SocketService
+  class SocketService : public IoService
   {
   public:
-    virtual ~SocketService() {}
-    virtual void RegisterDescriptorOperation(int type, ReactorOperation* op) = 0;
-    virtual void CancelDescriptor(SocketHandle fd) = 0;
+    SocketService();
+    virtual void RegisterDescriptorOperation(int type, ReactorOperation* op) override;
+    virtual void CancelDescriptor(SocketHandle fd) override;
+    virtual void AddTimer(const Util::Timer& timer) override;
+    virtual void Run() override;
+    virtual void Stop() override;
+    virtual bool IsRunning() const override;
+  private:
+    Reactor reactor;
+    Util::TimerHost timers;
   };
 }

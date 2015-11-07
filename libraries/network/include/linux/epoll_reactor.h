@@ -2,14 +2,14 @@
 
 namespace NetZ
 {
-  class Reactor : public SocketService
+  class Reactor
   {
   public:
     Reactor();
     ~Reactor();
 
-    virtual void RegisterDescriptorOperation(int type, ReactorOperation* op) override;
-    virtual void CancelDescriptor(SocketHandle fd) override;
+    void RegisterDescriptorOperation(int type, ReactorOperation* op);
+    void CancelDescriptor(SocketHandle fd);
 
     void Run(int timeout = 200);
     void Stop() { shutdown = true; }
