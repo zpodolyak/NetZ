@@ -5,20 +5,21 @@
 #include "http_parser.h"
 
 constexpr int buffer_size = 4096;
-constexpr uint64_t timeoutDuration = 15000;
 
 namespace NetZ
 {
 namespace Http
 {
-  HttpConnection::HttpConnection(HttpServer* _server, TcpSocket _socket, ResourceManager* rMgr)
+  HttpConnection::HttpConnection(TcpSocket&& _socket, ResourceManager* rMgr)
     : socket(std::move(_socket))
-    , server(_server)
     , resource_mgr(rMgr)
-    , socketTimeout()
   {
     Read(HttpParser::ParseState::RequestParsing);
-    server->GetSocketService().AddTimer(socketTimeout);
+  }
+
+  void HttpConnection::Stop()
+  {
+    socket.Close();
   }
 
   void HttpConnection::Read(HttpParser::ParseState state)
@@ -26,7 +27,7 @@ namespace Http
     char buffer[buffer_size];
     socket.Receive(buffer, buffer_size, 0, [this, &state, &buffer](int bytes_transferred, const std::error_code& ec)
     {
-      socketTimeout.Cancel();
+      if (socketTimeout) socketTimeout->Cancel();
       if (bytes_transferred > 0 && !ec)
       {
         InputBuffer input(buffer, bytes_transferred);
@@ -65,14 +66,10 @@ namespace Http
   {
     socket.Send(static_cast<const char*>(data), data.buffer.size(), 0, [this](int bytes_transferred, const std::error_code& ec)
     {
-      socketTimeout.Schedule(timeoutDuration, 0, 
-      [this]()
-      {
-        server->RemoveConnection(this);
-      });
+      if (socketTimeout) socketTimeout->Reset();
       if (ec == std::errc::operation_canceled)
       {
-        server->RemoveConnection(this);
+        Stop();
       }
     });
   }

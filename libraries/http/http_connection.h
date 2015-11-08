@@ -8,22 +8,26 @@ namespace NetZ
 {
 namespace Http
 {
+  constexpr uint64_t socketTimeoutDuration = 15000;
+
   class HttpConnection
   {
+    friend class HttpServer;
   public:
     HttpConnection(const HttpConnection&) = delete;
     HttpConnection& operator=(const HttpConnection&) = delete;
 
-    HttpConnection(HttpServer* _server, TcpSocket _socket, ResourceManager* rMgr);
+    HttpConnection(TcpSocket&& _socket, ResourceManager* rMgr);
     ~HttpConnection() { Stop(); }
-    void Stop() { socket.Close(); }
+    void Stop();
+
   private:
     TcpSocket socket;
-    HttpServer* server;
     HttpMessageRequest request;
     HttpMessageResponse response;
     ResourceManager* resource_mgr;
-    Util::Timer socketTimeout;
+    Util::Timer* socketTimeout = nullptr;
+
     void Read(HttpParser::ParseState state);
     void Write(const InputBuffer& buffer);
     void WriteDefaultResponse();

@@ -10,7 +10,6 @@ namespace Http
 {
   HttpServer::HttpServer(const ConnectionData& conn)
     : svrSocket(&service, ProtocolData<Protocol::TCP>(), conn)
-    , clientSocket(&service)
     , resource_mgr()
     , service()
   {
@@ -27,6 +26,8 @@ namespace Http
 
   void HttpServer::RemoveConnection(HttpConnection* connection)
   {
+    service.RemoveTimer(connection->socketTimeout);
+
     auto conn = std::begin(connections);
     while (conn != std::end(connections))
     {
@@ -35,18 +36,21 @@ namespace Http
       else
         ++conn;
     }
-    connection->Stop();
+    if (connection->socket.IsOpen()) connection->Stop();
   }
 
   void HttpServer::StartAccepting()
   {
     auto conn = svrSocket.LocalConnection();
-    svrSocket.Accept(clientSocket, &conn, [this](const std::error_code& ec)
+    TcpSocket clientSocket(&service);
+    svrSocket.Accept(clientSocket, &conn, [this, &clientSocket](const std::error_code& ec)
     {
       if (!ec)
       {
-        DebugMessage("received new connection!");
-        connections.insert(make_unique<HttpConnection>(this, std::move(clientSocket), &resource_mgr));
+        DebugMessage("received new HTTP connection!");
+        auto newConn = make_unique<HttpConnection>(std::move(clientSocket), &resource_mgr);
+        newConn->socketTimeout = service.AddTimer(Util::Timer(0, socketTimeoutDuration, [this, conn = newConn.get()]() { RemoveConnection(conn); }));
+        connections.insert(std::move(newConn));
         StartAccepting();
       }
     });

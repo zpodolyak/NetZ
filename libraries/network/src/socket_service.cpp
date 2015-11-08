@@ -6,6 +6,7 @@ namespace NetZ
 {
   SocketService::SocketService()
     : reactor()
+    , timers()
   {
   }
 
@@ -19,14 +20,20 @@ namespace NetZ
     reactor.CancelDescriptor(fd);
   }
 
-  void SocketService::AddTimer(const Util::Timer& timer)
+  Util::Timer* SocketService::AddTimer(Util::Timer&& timer)
   {
+    return timers.Add(std::move(timer));
+  }
 
+  void SocketService::RemoveTimer(Util::Timer* timer)
+  {
+    timers.Remove(timer);
   }
 
   void SocketService::Run()
   {
-
+    reactor.Run();
+    timers.RunTimers();
   }
 
   void SocketService::Stop()

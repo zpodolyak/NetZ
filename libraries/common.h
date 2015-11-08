@@ -59,5 +59,4 @@ typedef SOCKET SocketHandle;
 #endif
 
 #include "utils.h"
-#include "timer.h"
 

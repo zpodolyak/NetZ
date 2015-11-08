@@ -37,7 +37,8 @@ namespace NetZ
       : descriptor(fd)
       , runFunc(std::move(rFunc))
     {}
-    ReactorOperation(const ReactorOperation&) = default;
+    ReactorOperation(const ReactorOperation&) = delete;
+    ReactorOperation& operator=(const ReactorOperation&) = delete;
     ~ReactorOperation() {}
 
     void RunOperation(std::error_code& ec)
