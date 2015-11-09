@@ -10,9 +10,14 @@ namespace NetZ
 {
 namespace Http
 {
-  HttpConnection::HttpConnection(TcpSocket&& _socket, ResourceManager* rMgr)
+  HttpConnection::HttpConnection(TcpSocket&& _socket, SocketService* _service, ResourceManager* rMgr)
     : socket(std::move(_socket))
     , resource_mgr(rMgr)
+    , service(_service)
+  {
+  }
+
+  void HttpConnection::Start()
   {
     Read(HttpParser::ParseState::RequestParsing);
   }
@@ -27,7 +32,7 @@ namespace Http
     char buffer[buffer_size];
     socket.Receive(buffer, buffer_size, 0, [this, &state, &buffer](int bytes_transferred, const std::error_code& ec)
     {
-      if (socketTimeout) socketTimeout->Cancel();
+      service->ResetTimer(socketTimeoutTimer);
       if (bytes_transferred > 0 && !ec)
       {
         InputBuffer input(buffer, bytes_transferred);
@@ -66,7 +71,7 @@ namespace Http
   {
     socket.Send(static_cast<const char*>(data), data.buffer.size(), 0, [this](int bytes_transferred, const std::error_code& ec)
     {
-      if (socketTimeout) socketTimeout->Reset();
+      service->ResetTimer(socketTimeoutTimer);
       if (ec == std::errc::operation_canceled)
       {
         Stop();

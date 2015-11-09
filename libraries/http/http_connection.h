@@ -17,8 +17,9 @@ namespace Http
     HttpConnection(const HttpConnection&) = delete;
     HttpConnection& operator=(const HttpConnection&) = delete;
 
-    HttpConnection(TcpSocket&& _socket, ResourceManager* rMgr);
+    HttpConnection(TcpSocket&& _socket, SocketService* _service, ResourceManager* rMgr);
     ~HttpConnection() { Stop(); }
+    void Start();
     void Stop();
 
   private:
@@ -26,7 +27,8 @@ namespace Http
     HttpMessageRequest request;
     HttpMessageResponse response;
     ResourceManager* resource_mgr;
-    Util::Timer* socketTimeout = nullptr;
+    SocketService* service;
+    Util::TimerID socketTimeoutTimer = -1;
 
     void Read(HttpParser::ParseState state);
     void Write(const InputBuffer& buffer);

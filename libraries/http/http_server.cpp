@@ -26,7 +26,7 @@ namespace Http
 
   void HttpServer::RemoveConnection(HttpConnection* connection)
   {
-    service.RemoveTimer(connection->socketTimeout);
+    service.CancelTimer(connection->socketTimeoutTimer);
 
     auto conn = std::begin(connections);
     while (conn != std::end(connections))
@@ -48,9 +48,10 @@ namespace Http
       if (!ec)
       {
         DebugMessage("received new HTTP connection!");
-        auto newConn = make_unique<HttpConnection>(std::move(clientSocket), &resource_mgr);
-        newConn->socketTimeout = service.AddTimer(Util::Timer(0, socketTimeoutDuration, [this, conn = newConn.get()]() { RemoveConnection(conn); }));
+        auto newConn = make_unique<HttpConnection>(std::move(clientSocket), &service, &resource_mgr);
+        newConn->socketTimeoutTimer = service.AddTimer(Util::Timer(0, socketTimeoutDuration, [this, &newConn]() { RemoveConnection(newConn.get()); }));
         connections.insert(std::move(newConn));
+        newConn->Start();
         StartAccepting();
       }
     });

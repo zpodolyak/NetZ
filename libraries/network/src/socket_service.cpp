@@ -20,14 +20,19 @@ namespace NetZ
     reactor.CancelDescriptor(fd);
   }
 
-  Util::Timer* SocketService::AddTimer(Util::Timer&& timer)
+  Util::TimerID SocketService::AddTimer(Util::Timer&& timer)
   {
     return timers.Add(std::move(timer));
   }
 
-  void SocketService::RemoveTimer(Util::Timer* timer)
+  void SocketService::CancelTimer(Util::TimerID timerID)
   {
-    timers.Remove(timer);
+    timers.Cancel(timerID);
+  }
+
+  void SocketService::ResetTimer(Util::TimerID timerID)
+  {
+    timers.Reset(timerID);
   }
 
   void SocketService::Run()

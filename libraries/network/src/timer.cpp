@@ -50,7 +50,7 @@ namespace Util
     {
       state = TimerState::Running;
       handler();
-      if (IsPeriodic())
+      if (IsPeriodic() && state != TimerState::Cancelled)
       {
         nextRun = std::chrono::steady_clock::now() + periodMs;
         state = TimerState::Reset;
@@ -69,19 +69,39 @@ namespace Util
   {
   }
 
-  Timer* TimerHost::Add(Timer&& timer)
+  TimerID TimerHost::Add(Timer&& timer)
   {
     auto it = queue.emplace(timer.GetNextRun(), std::move(timer));
-    return &it->second;
+    auto& tmr = it->second;
+    if (tmr.GetID() == -1) 
+      tmr.SetID(timerCounter++);
+    return it->second.GetID();
   }
 
-  void TimerHost::Remove(Timer* timer)
+  void TimerHost::Cancel(TimerID timerID)
   {
     for (auto it = queue.begin(); it != queue.end();)
     {
-      if (&it->second == timer)
+      if (it->second.GetID() == timerID)
       {
+        if (it->second.GetState() != Timer::TimerState::Running)
+          it = queue.erase(it);
+        else it->second.Cancel();
+      }
+      else ++it;
+    }
+  }
+
+  void TimerHost::Reset(TimerID timerID)
+  {
+    for (auto it = queue.begin(); it != queue.end();)
+    {
+      if (it->second.GetID() == timerID)
+      {
+        it->second.Reset();
+        Add(std::move(it->second));
         it = queue.erase(it);
+        return;
       }
       else ++it;
     }
@@ -89,25 +109,25 @@ namespace Util
 
   void TimerHost::RunTimers(uint64_t timeout)
   {
-    if (queue.empty())
+    if (!HasTimers())
       return;
 
-    Timestamp runTimeLimit = std::chrono::steady_clock::now() + Milliseconds(timeout);
+    auto runTimeLimit = std::chrono::steady_clock::now() + Milliseconds(timeout);
     auto it = queue.begin();
 
     while (it->first < runTimeLimit)
     {
       if (it == queue.end())
         it = queue.begin();
-      if (it->second.Run() != Timer::TimerState::Error)
+      auto currentState = it->second.Run();
+      if (currentState != Timer::TimerState::Error)
       {
-        auto currentState = it->second.GetState();
         if (currentState == Timer::TimerState::Reset)
           Add(std::move(it->second));
         if (currentState != Timer::TimerState::Scheduled)
         {
           it = queue.erase(it);
-          if (queue.empty())
+          if (!HasTimers())
             return;
         }
       }

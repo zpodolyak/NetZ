@@ -11,6 +11,7 @@ namespace Util
   using Milliseconds = std::chrono::milliseconds;
   using Timestamp = std::chrono::time_point<std::chrono::steady_clock>;
   using TimerCallback = std::function<void()>;
+  using TimerID = int;
 
   class Timer
   {
@@ -33,29 +34,38 @@ namespace Util
     };
 
     void Schedule(uint64_t startIn, uint64_t interval, TimerCallback&& _handler);
-    void Reset();
-    TimerState Run();
-    void Cancel();
     bool IsPeriodic() const { return periodMs > Milliseconds(0); }
     const Timestamp& GetNextRun() const { return nextRun; }
-    const TimerState GetState() const { return state; }
+    TimerState GetState() const { return state; }
+    void SetID(TimerID id) { timerID = id; }
+    int GetID() const { return timerID; }
+    TimerState Run();
+    void Cancel();
+    void Reset();
   private:
     Milliseconds startInMs, periodMs;
     Timestamp nextRun;
     TimerCallback handler;
     TimerState state;
+    TimerID timerID = -1;
   };
 
   class TimerHost
   {
   public:
     TimerHost();
+    TimerHost(const TimerHost&) = delete;
+    TimerHost& operator=(const TimerHost&) = delete;
 
-    Timer* Add(Timer&& timer);
-    void Remove(Timer* timer);
+    TimerID Add(Timer&& timer);
+    void Cancel(TimerID timerID);
+    void Reset(TimerID timerID);
     void RunTimers(uint64_t timeout = 200);
-  private:
-    std::multimap<Timestamp, Timer> queue;
+    bool HasTimers() const { return !queue.empty(); }
+  protected:
+    typedef std::multimap<Timestamp, Timer> TimerQueue;
+    TimerQueue queue;
+    int timerCounter = 0;
   };
 }
 }
