@@ -1,5 +1,10 @@
 #include "timer.h"
 
+namespace
+{
+  std::mutex lock;
+}
+
 namespace NetZ
 {
 namespace Util
@@ -43,6 +48,7 @@ namespace Util
 
   void Timer::Schedule(uint64_t startIn, uint64_t interval, TimerCallback&& _handler)
   {
+    std::lock_guard<std::mutex> guard(lock);
     timerData.startInMs = Milliseconds(startIn);
     timerData.periodMs = Milliseconds(interval);
     timerData.handler = std::move( _handler );
@@ -52,6 +58,7 @@ namespace Util
 
   void Timer::Reset()
   {
+    std::lock_guard<std::mutex> guard(lock);
     timerData.startInMs = (IsPeriodic()) ? timerData.periodMs : timerData.startInMs;
     nextRun = std::chrono::steady_clock::now() + timerData.startInMs;
     state = TimerState::Reset;
@@ -59,6 +66,7 @@ namespace Util
 
   Timer::TimerState Timer::Run()
   {
+    std::unique_lock<std::mutex> guard(lock);
     if (!timerData.handler)
     {
       state = TimerState::Error;
@@ -69,7 +77,9 @@ namespace Util
     if (now >= nextRun && state != TimerState::Cancelled)
     {
       state = TimerState::Running;
+      guard.unlock();
       timerData.handler();
+      guard.lock();
       if (IsPeriodic() && state != TimerState::Cancelled)
       {
         nextRun = std::chrono::steady_clock::now() + timerData.periodMs;
@@ -106,6 +116,7 @@ namespace Util
 
   void Timer::Cancel()
   {
+    std::lock_guard<std::mutex> guard(lock);
     state = TimerState::Cancelled;
   }
 

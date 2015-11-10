@@ -4,6 +4,7 @@
 #include <functional>
 #include <map>
 #include <thread>
+#include <mutex>
 
 namespace NetZ
 {
