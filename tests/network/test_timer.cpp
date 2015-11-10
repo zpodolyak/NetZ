@@ -2,12 +2,13 @@
 #include <gtest/gtest.h>
 
 #include "libraries/network/include/timer.h"
+#include <mutex>
 
 using NetZ::Util::Timer;
 using NetZ::Util::TimerHost;
 using NetZ::Util::Milliseconds;
 
-class TestTimerHost : public TimerHost
+class TimerHostTest : public TimerHost
 {
 public:
   using TimerHost::queue;
@@ -18,19 +19,19 @@ struct MockCalledBackObject
   MOCK_METHOD0(CallMe, void());
 };
 
-struct TestTimer : public ::testing::Test
+struct TestTimerHost : public ::testing::Test
 {
-  TestTimer()
+  TestTimerHost()
     : host()
   {
   }
 
   MockCalledBackObject cObj;
-  TestTimerHost host;
+  TimerHostTest host;
   int maxCall = 3, callCounter = 0;
 };
 
-TEST_F(TestTimer, OneShotInTwoSecs)
+TEST_F(TestTimerHost, OneShotInTwoSecs)
 {
   EXPECT_CALL(cObj, CallMe()).Times(1);
   host.Add(Timer(2000, 0, [this]() { cObj.CallMe(); }));
@@ -40,7 +41,7 @@ TEST_F(TestTimer, OneShotInTwoSecs)
   EXPECT_EQ(host.queue.size(), 0);
 }
 
-TEST_F(TestTimer, PeriodicEveryTwoSecs)
+TEST_F(TestTimerHost, PeriodicEveryTwoSecs)
 {
   EXPECT_CALL(cObj, CallMe()).Times(3);
   host.Add(Timer(2000, 2000, [this]() 
@@ -55,7 +56,7 @@ TEST_F(TestTimer, PeriodicEveryTwoSecs)
   EXPECT_EQ(callCounter, 3);
 }
 
-TEST_F(TestTimer, PeriodicCancelAfterOne)
+TEST_F(TestTimerHost, PeriodicCancelAfterOne)
 {
   EXPECT_CALL(cObj, CallMe()).Times(1);
   auto timer = host.Add(Timer(2000, 2000, [this]()
@@ -74,7 +75,7 @@ TEST_F(TestTimer, PeriodicCancelAfterOne)
   EXPECT_FALSE(host.HasTimers());
 }
 
-TEST_F(TestTimer, PeriodicReset)
+TEST_F(TestTimerHost, PeriodicReset)
 {
   EXPECT_CALL(cObj, CallMe()).Times(1);
   auto timer = host.Add(Timer(2000, 2000, [this]()
@@ -98,6 +99,64 @@ TEST_F(TestTimer, PeriodicReset)
       host.Cancel(timer);
   }
   EXPECT_FALSE(host.HasTimers());
+}
+
+TEST(SingleTimer, TestSingleTimer)
+{
+  MockCalledBackObject cObj;
+  EXPECT_CALL(cObj, CallMe()).Times(1);
+  Timer t(2000, 0, [&cObj]() { cObj.CallMe(); });
+  while (t.GetState() != Timer::TimerState::Finished)
+    t.RunUntil();
+  EXPECT_CALL(cObj, CallMe()).Times(3);
+  auto periodCount = 0;
+  t.Schedule(2000, 1000, [&cObj, &periodCount]() { cObj.CallMe(); ++periodCount; });
+  while (periodCount < 3)
+    t.RunUntil();
+  EXPECT_CALL(cObj, CallMe() ).Times(2);
+  t.Reset();
+  auto now = std::chrono::steady_clock::now();
+  auto cancelAt = now + Milliseconds(2100);
+  while (t.GetState() != Timer::TimerState::Cancelled)
+  {
+    t.RunUntil();
+    now = std::chrono::steady_clock::now();
+    if (cancelAt < now)
+      t.Cancel();
+  }
+  EXPECT_CALL(cObj, CallMe()).Times(3);
+  t.Reset();
+  now = std::chrono::steady_clock::now();
+  auto resetAt = now + Milliseconds(2100);
+  while (periodCount < 8)
+  {
+    t.RunUntil();
+    now = std::chrono::steady_clock::now();
+    if (resetAt < now)
+    {
+      t.Reset();
+      resetAt = now + Milliseconds(2100);
+    }
+  }
+}
+
+TEST(SingleTimerThread, TestTimerThread)
+{
+  MockCalledBackObject cObj;
+  EXPECT_CALL(cObj, CallMe()).Times(1);
+  Timer t(Timer::TimerData(2000, 0, [&cObj]() { cObj.CallMe(); }));
+  t.RunInThread();
+  while (t.GetState() != Timer::TimerState::Finished);
+  EXPECT_CALL(cObj, CallMe()).Times(3);
+  auto periodCount = 0;
+  t.Schedule(2000, 1000, [&cObj, &periodCount]() 
+  { 
+    cObj.CallMe(); 
+    ++periodCount; 
+  });
+  t.RunInThread();
+  while (periodCount < 3);
+  t.Cancel();
 }
 
 #include "libraries/network/src/timer.cpp"

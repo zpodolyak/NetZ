@@ -3,6 +3,7 @@
 #include <chrono>
 #include <functional>
 #include <map>
+#include <thread>
 
 namespace NetZ
 {
@@ -16,7 +17,17 @@ namespace Util
   class Timer
   {
   public:
+    struct TimerData
+    {
+      Milliseconds startInMs, periodMs;
+      TimerCallback handler;
+
+      TimerData();
+      TimerData(uint64_t startIn, uint64_t interval, TimerCallback&& _handler);
+    };
+
     Timer();
+    explicit Timer(TimerData&& tData);
     Timer(uint64_t startIn, uint64_t interval, TimerCallback&& _handler);
     Timer(Timer&&) = default;
     Timer(const Timer&) = delete;
@@ -33,19 +44,21 @@ namespace Util
       Error
     };
 
+    void Schedule(TimerData&& tData);
     void Schedule(uint64_t startIn, uint64_t interval, TimerCallback&& _handler);
-    bool IsPeriodic() const { return periodMs > Milliseconds(0); }
+    bool IsPeriodic() const { return timerData.periodMs > Milliseconds(0); }
     const Timestamp& GetNextRun() const { return nextRun; }
     TimerState GetState() const { return state; }
     void SetID(TimerID id) { timerID = id; }
     int GetID() const { return timerID; }
     TimerState Run();
+    TimerState RunUntil(uint64_t timeout = 200);
+    void RunInThread();
     void Cancel();
     void Reset();
   private:
-    Milliseconds startInMs, periodMs;
+    TimerData timerData;
     Timestamp nextRun;
-    TimerCallback handler;
     TimerState state;
     TimerID timerID = -1;
   };

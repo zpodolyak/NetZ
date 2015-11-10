@@ -4,42 +4,62 @@ namespace NetZ
 {
 namespace Util
 {
-  Timer::Timer()
+  Timer::TimerData::TimerData()
     : startInMs(0)
     , periodMs(0)
     , handler()
+  {
+  }
+
+  Timer::TimerData::TimerData(uint64_t startIn, uint64_t interval, TimerCallback && _handler)
+    : startInMs(startIn)
+    , periodMs(interval)
+    , handler(std::move(_handler))
+  {
+  }
+
+  Timer::Timer()
+    : timerData()
     , state(TimerState::NotScheduled)
   {
   }
 
+  Timer::Timer(TimerData&& tData)
+    : timerData(std::move(tData))
+  {
+  }
+
   Timer::Timer(uint64_t startIn, uint64_t interval, TimerCallback && _handler)
-    : startInMs(startIn)
-    , periodMs(interval)
-    , nextRun(std::chrono::steady_clock::now() + startInMs)
-    , handler(std::move(_handler))
+    : timerData(startIn, interval, std::move(_handler))
+    , nextRun(std::chrono::steady_clock::now() + timerData.startInMs)
     , state(TimerState::Scheduled)
   {
   }
 
+  void Timer::Schedule(TimerData&& tData)
+  {
+    timerData = std::move(tData);
+  }
+
   void Timer::Schedule(uint64_t startIn, uint64_t interval, TimerCallback&& _handler)
   {
-    startInMs = Milliseconds(startIn);
-    periodMs = Milliseconds(interval);
-    nextRun = std::chrono::steady_clock::now() + startInMs;
-    handler = std::move(_handler);
+    timerData.startInMs = Milliseconds(startIn);
+    timerData.periodMs = Milliseconds(interval);
+    timerData.handler = std::move( _handler );
+    nextRun = std::chrono::steady_clock::now() + timerData.startInMs;
     state = TimerState::Scheduled;
   }
 
   void Timer::Reset()
   {
-    startInMs = (IsPeriodic()) ? periodMs : startInMs;
-    nextRun = std::chrono::steady_clock::now() + startInMs;
+    timerData.startInMs = (IsPeriodic()) ? timerData.periodMs : timerData.startInMs;
+    nextRun = std::chrono::steady_clock::now() + timerData.startInMs;
     state = TimerState::Reset;
   }
 
   Timer::TimerState Timer::Run()
   {
-    if (!handler)
+    if (!timerData.handler)
     {
       state = TimerState::Error;
       return state;
@@ -49,15 +69,39 @@ namespace Util
     if (now >= nextRun && state != TimerState::Cancelled)
     {
       state = TimerState::Running;
-      handler();
+      timerData.handler();
       if (IsPeriodic() && state != TimerState::Cancelled)
       {
-        nextRun = std::chrono::steady_clock::now() + periodMs;
+        nextRun = std::chrono::steady_clock::now() + timerData.periodMs;
         state = TimerState::Reset;
       }
       else state = TimerState::Finished;
     }
     return state;
+  }
+
+  Timer::TimerState Timer::RunUntil(uint64_t timeout)
+  {
+    auto runTimeLimit = std::chrono::steady_clock::now() + Milliseconds(timeout);
+
+    while (nextRun < runTimeLimit)
+    {
+      Run();
+      if (state == Timer::TimerState::Error || state == Timer::TimerState::Finished)
+        return state;
+    }
+    return state;
+  }
+
+  void Timer::RunInThread()
+  {
+    std::thread([this]()
+    {
+      while (state != TimerState::Cancelled && state != TimerState::Finished)
+      {
+        Run();
+      }
+    }).detach();
   }
 
   void Timer::Cancel()
@@ -96,7 +140,8 @@ namespace Util
   {
     for (auto it = queue.begin(); it != queue.end();)
     {
-      if (it->second.GetID() == timerID)
+      if (it->second.GetID() == timerID 
+          && it->second.GetState() != Timer::TimerState::Running)
       {
         it->second.Reset();
         Add(std::move(it->second));
