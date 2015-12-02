@@ -6,6 +6,7 @@ namespace Http
 {
   struct HttpMessageRequest;
   struct HttpMessageResponse;
+  class Resource;
 
   class ResourceManager
   {
@@ -13,7 +14,7 @@ namespace Http
     ResourceManager();
     
     bool FindHttpResource(const HttpMessageRequest& request, HttpMessageResponse& response);
-    std::string GetDefaultReply(const HttpMessageResponse& response);
+    Resource* GetResource() const;
   };
 }
 }

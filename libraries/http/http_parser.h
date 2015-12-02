@@ -18,6 +18,14 @@ namespace Http
     {
     }
 
+    InputBuffer(InputBuffer&& other)
+    {
+      buffer.swap(other.buffer);
+      sc = other.sc;
+      offset = other.offset;
+      other.offset = nullptr;
+    }
+
     const char* Start() { return buffer.data(); }
     const char* End() { return buffer.data() + buffer.size(); }
 

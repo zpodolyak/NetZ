@@ -1,5 +1,6 @@
 #include "libraries/common.h"
 #include "libraries/network/include/network.h"
+#include "resource.h"
 #include "resource_manager.h"
 #include "http_connection.h"
 #include "http_parser.h"
@@ -61,13 +62,15 @@ namespace Http
         }
         if (!resource_mgr->FindHttpResource(request, response))
         {
+          response.statusCode = HttpStatusCode::not_found;
           WriteDefaultResponse();
         }
+        else Write(resource_mgr->GetResource()->ToBuffer());
       }
     });
   }
 
-  void HttpConnection::Write(const InputBuffer& data)
+  void HttpConnection::Write(InputBuffer&& data)
   {
     socket.Send(static_cast<const char*>(data), data.buffer.size(), 0, [this](int bytes_transferred, const std::error_code& ec)
     {
@@ -81,9 +84,8 @@ namespace Http
 
   void HttpConnection::WriteDefaultResponse()
   {
-    auto replyString = resource_mgr->GetDefaultReply(response);
-    InputBuffer data(replyString.c_str(), replyString.length());
-    Write(data);
+    auto replyString = response.GetDefaultReply();
+    Write(InputBuffer(replyString.c_str(), replyString.length()));
   }
 }
 }

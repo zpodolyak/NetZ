@@ -47,6 +47,32 @@ namespace Http
   struct HttpMessageResponse : public HttpMessage
   {
     HttpStatusCode statusCode;
+
+    std::string GetStatusString() const
+    {
+      switch (statusCode)
+      {
+      case HttpStatusCode::ok: return "HTTP/1.1 200 OK\r\n";
+      case HttpStatusCode::created: return "HTTP/1.1 201 Created\r\n";
+      case HttpStatusCode::accepted: return "HTTP/1.1 202 Accepted\r\n";
+      case HttpStatusCode::no_content: return "HTTP/1.1 204 No Content\r\n";
+      case HttpStatusCode::multiple_choices: return "HTTP/1.1 300 Multiple Choices\r\n";
+      case HttpStatusCode::moved_permanently: return "HTTP/1.1 301 Moved Permanently\r\n";
+      case HttpStatusCode::moved_temporarily: return "HTTP/1.1 302 Moved Temporarily\r\n";
+      case HttpStatusCode::not_modified: return "HTTP/1.1 304 Not Modified\r\n";
+      case HttpStatusCode::bad_request: return "HTTP/1.1 400 Bad Request\r\n";
+      case HttpStatusCode::unauthorized: return "HTTP/1.1 401 Unauthorized\r\n";
+      case HttpStatusCode::forbidden: return "HTTP/1.1 403 Forbidden\r\n";
+      case HttpStatusCode::not_found: return "HTTP/1.1 404 Not Found\r\n";
+      case HttpStatusCode::internal_server_error: return "HTTP/1.1 500 Internal Server Error\r\n";
+      case HttpStatusCode::not_implemented: return "HTTP/1.1 501 Not Implemented\r\n";
+      case HttpStatusCode::bad_gateway: return "HTTP/1.1 502 Bad Gateway\r\n";
+      case HttpStatusCode::service_unavailable: return "HTTP/1.1 503 Service Unavailable\r\n";
+      }
+      return "";
+    }
+
+    std::string GetDefaultReply() const;
   };
 }
 }

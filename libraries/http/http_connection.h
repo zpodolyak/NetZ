@@ -31,7 +31,7 @@ namespace Http
     Util::TimerID socketTimeoutTimer = -1;
 
     void Read(HttpParser::ParseState state);
-    void Write(const InputBuffer& buffer);
+    void Write(InputBuffer&& buffer);
     void WriteDefaultResponse();
   };
 }

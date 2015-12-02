@@ -15,9 +15,9 @@ namespace Http
     return false;
   }
 
-  std::string ResourceManager::GetDefaultReply(const HttpMessageResponse& response)
+  Resource* ResourceManager::GetResource() const
   {
-    return std::string();
+    return nullptr;
   }
 }
 }
