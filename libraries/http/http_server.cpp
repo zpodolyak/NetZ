@@ -8,9 +8,9 @@ namespace NetZ
 {
 namespace Http
 {
-  HttpServer::HttpServer(const ConnectionData& conn)
+  HttpServer::HttpServer(const ConnectionData& conn, const std::string& documentRoot)
     : svrSocket(&service, ProtocolData<Protocol::TCP>(), conn)
-    , resource_mgr()
+    , resource_mgr(documentRoot)
     , service()
   {
     svrSocket.SetNonBlocking(true);

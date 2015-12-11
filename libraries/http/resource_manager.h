@@ -1,20 +1,25 @@
 #pragma once
 
+#include "resource.h"
+
 namespace NetZ
 {
 namespace Http
 {
   struct HttpMessageRequest;
   struct HttpMessageResponse;
-  class Resource;
 
   class ResourceManager
   {
   public:
-    ResourceManager();
+    ResourceManager(const std::string& docRoot);
     
-    bool FindHttpResource(const HttpMessageRequest& request, HttpMessageResponse& response);
-    Resource* GetResource() const;
+    bool GetResource(const HttpMessageRequest& request, HttpMessageResponse& response);
+    bool AddResource(const HttpMessageRequest& request, HttpMessageResponse& response);
+    Resource* ToResource() const;
+  private:
+    std::string documentRoot;
+    std::unique_ptr<Resource> selectedResource;
   };
 }
 }

@@ -3,7 +3,6 @@
 #include "resource.h"
 #include "resource_manager.h"
 #include "http_connection.h"
-#include "http_parser.h"
 
 constexpr int buffer_size = 4096;
 
@@ -60,12 +59,20 @@ namespace Http
             else Read(HttpParser::ParseState::HeaderParsing);
           }
         }
-        if (!resource_mgr->FindHttpResource(request, response))
+        if (request.method == "GET")
         {
-          response.statusCode = HttpStatusCode::not_found;
-          WriteDefaultResponse();
+          if (!resource_mgr->GetResource(request, response))
+          {
+            response.statusCode = HttpStatusCode::not_found;
+            WriteDefaultResponse();
+          }
+          else Write(resource_mgr->ToResource()->ToBuffer());
         }
-        else Write(resource_mgr->GetResource()->ToBuffer());
+        else if (request.method == "POST")
+        {
+          resource_mgr->AddResource(request, response);
+          Write(resource_mgr->ToResource()->ToBuffer());
+        }
       }
     });
   }

@@ -14,7 +14,7 @@ namespace Http
     HttpServer(const HttpServer&) = delete;
     HttpServer& operator=(const HttpServer&) = delete;
 
-    HttpServer(const ConnectionData& conn);
+    HttpServer(const ConnectionData& conn, const std::string& documentRoot);
     
     void Start();
     void RemoveConnection(HttpConnection* conn);

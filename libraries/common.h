@@ -10,6 +10,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cinttypes>
+#include <fstream>
 #include <sstream>
 #include <functional>
 #include <algorithm>
