@@ -1,7 +1,5 @@
 #include "libraries/common.h"
 #include "libraries/network/include/network.h"
-#include "resource_manager.h"
-#include "http_connection.h"
 #include "http_server.h"
 
 namespace NetZ
@@ -10,6 +8,7 @@ namespace Http
 {
   HttpServer::HttpServer(const ConnectionData& conn, const std::string& documentRoot)
     : svrSocket(&service, ProtocolData<Protocol::TCP>(), conn)
+    , clientSocket(&service)
     , resource_mgr(documentRoot)
     , service()
   {
@@ -42,16 +41,15 @@ namespace Http
   void HttpServer::StartAccepting()
   {
     auto conn = svrSocket.LocalConnection();
-    TcpSocket clientSocket(&service);
-    svrSocket.Accept(clientSocket, &conn, [this, &clientSocket](const std::error_code& ec)
+    svrSocket.Accept(clientSocket, &conn, [this](const std::error_code& ec)
     {
       if (!ec)
       {
         DebugMessage("received new HTTP connection!");
         auto newConn = make_unique<HttpConnection>(std::move(clientSocket), &service, &resource_mgr);
         newConn->socketTimeoutTimer = service.AddTimer(Util::Timer(0, socketTimeoutDuration, [this, &newConn]() { RemoveConnection(newConn.get()); }));
-        connections.insert(std::move(newConn));
         newConn->Start();
+        connections.insert(std::move(newConn));
         StartAccepting();
       }
     });

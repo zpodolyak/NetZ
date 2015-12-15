@@ -1,13 +1,13 @@
 #pragma once
 
 #include "libraries/network/include/socket_service.h"
+#include "http_connection.h"
+#include "resource_manager.h"
 
 namespace NetZ
 {
 namespace Http
 {
-  class HttpConnection;
-
   class HttpServer
   {
   public:
@@ -22,6 +22,7 @@ namespace Http
     void StartAccepting();
 
     TcpServerSocket svrSocket;
+    TcpSocket clientSocket;
     ResourceManager resource_mgr;
     SocketService service;
     std::set<std::unique_ptr<HttpConnection>> connections;

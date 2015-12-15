@@ -1,7 +1,6 @@
 #pragma once
 
 #include "http_common.h"
-#include "http_server.h"
 #include "http_parser.h"
 
 namespace NetZ
@@ -9,6 +8,8 @@ namespace NetZ
 namespace Http
 {
   constexpr uint64_t socketTimeoutDuration = 15000;
+  class ResourceManager;
+  class HttpServer;
 
   class HttpConnection
   {

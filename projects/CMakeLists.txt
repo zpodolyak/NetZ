@@ -6,3 +6,6 @@ target_link_libraries(example_tcp_server network)
 add_executable(example_tcp_client examples/example_tcp_client.cpp)
 target_link_libraries(example_tcp_client network)
 
+add_executable(example_http_server examples/example_http_server.cpp)
+target_link_libraries(example_http_server network http)
+
