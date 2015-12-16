@@ -36,7 +36,7 @@ namespace NetZ
         {
           auto op = it->second.front();
           // auto ec = std::make_error_code(std::errc::operation_canceled);
-          delete it->second.front();
+          delete op;
           it->second.pop_front();
         }
         taskQueue[i].erase(it);
@@ -61,13 +61,12 @@ namespace NetZ
     if (result > 0)
       for (int i = ReactorOps::max_ops - 1; i >= 0; --i)
         for (std::size_t j = 0; j < fds[i].fd_count; ++j)
-          for (auto it = taskQueue[i][fds[i].fd_array[j]].begin(); it != taskQueue[i][fds[i].fd_array[j]].end();)
-          {
-            auto rOp = *it;
-            rOp->RunOperation(ec);
-            delete rOp;
-            it = taskQueue[i][fds[i].fd_array[j]].erase(it);
-          }
+        { 
+          auto op = taskQueue[i][fds[i].fd_array[j]].front();
+          op->RunOperation(ec);
+          delete op;
+          taskQueue[i][fds[i].fd_array[j]].pop_front();
+        }
   }
 
   void Reactor::Stop()

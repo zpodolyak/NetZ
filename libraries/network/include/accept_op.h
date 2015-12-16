@@ -8,10 +8,10 @@ namespace NetZ
   class AcceptOperation : public ReactorOperation
   {
   public:
-    AcceptOperation(SocketType& _peer, ConnectionData* conn, SocketHandle fd, CompletionHandler<Handler> _handler)
+    AcceptOperation(SocketType& _peer, ConnectionData conn, SocketHandle fd, CompletionHandler<Handler> _handler)
       : ReactorOperation(fd, &AcceptOperation::DoAccept)
       , peer(_peer)
-      , connData(conn)
+      , connData(std::move(conn))
       , handler(std::move(_handler))
     {
 
@@ -28,13 +28,9 @@ namespace NetZ
 #else
       std::size_t addrLen = 0;
 #endif
-      sockaddr* addr = nullptr;
-      if (accOp->connData)
-      {
-        addrLen = sizeof(accOp->connData->data);
-        addr = (sockaddr*)&accOp->connData->data;
-      }
-      accOp->peer.Assign(ErrorWrapper(::accept(accOp->descriptor, addr, accOp->connData ? &addrLen : 0), ec));
+      addrLen = sizeof(accOp->connData.data);
+      sockaddr* addr = (sockaddr*)&accOp->connData.data;
+      accOp->peer.Assign(ErrorWrapper(::accept(accOp->descriptor, addr, &addrLen), ec));
       accOp->CompleteOperation(ec);
     }
 
@@ -45,7 +41,7 @@ namespace NetZ
 
   private:
     SocketType& peer;
-    ConnectionData* connData;
+    ConnectionData connData;
     CompletionHandler<Handler> handler;
   };
 }

@@ -24,7 +24,7 @@ int main(int argc, char* argv[])
   server.SetNonBlocking(true);
   conn = server.LocalConnection();
   DebugMessage("waiting for connections on port %" PRIu16, conn.GetPort());
-  server.Accept(client, &conn, [](const std::error_code& ec)
+  server.Accept(client, conn, [](const std::error_code& ec)
   {
     if (!ec)
     {

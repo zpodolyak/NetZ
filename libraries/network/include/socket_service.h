@@ -4,11 +4,11 @@
 
 namespace NetZ
 {
-
   class SocketService : public IoService
   {
   public:
     SocketService();
+
     virtual void RegisterDescriptorOperation(int type, ReactorOperation* op) override;
     virtual void CancelDescriptor(SocketHandle fd) override;
     virtual Util::TimerID AddTimer(Util::Timer&& timer) override;

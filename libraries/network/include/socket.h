@@ -100,12 +100,7 @@ namespace NetZ
     void SetNonBlocking(bool mode);
  
   protected:
-    ~SocketBase() 
-    { 
-      if (service)
-        service->CancelDescriptor(socket);
-      Close(); 
-    }
+    ~SocketBase();
 
     SocketHandle socket;
     SocketService* service = nullptr;

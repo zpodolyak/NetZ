@@ -40,16 +40,15 @@ namespace Http
 
   void HttpServer::StartAccepting()
   {
-    auto conn = svrSocket.LocalConnection();
-    svrSocket.Accept(clientSocket, &conn, [this](const std::error_code& ec)
+    svrSocket.Accept(clientSocket, svrSocket.LocalConnection(), [this](const std::error_code& ec)
     {
       if (!ec)
       {
         DebugMessage("received new HTTP connection!");
-        auto newConn = make_unique<HttpConnection>(std::move(clientSocket), &service, &resource_mgr);
-        newConn->socketTimeoutTimer = service.AddTimer(Util::Timer(0, socketTimeoutDuration, [this, &newConn]() { RemoveConnection(newConn.get()); }));
+        auto it = connections.insert(make_unique<HttpConnection>(std::move(clientSocket), &service, &resource_mgr));
+        auto newConn = it.first->get();
+        newConn->socketTimeoutTimer = service.AddTimer(Util::Timer(0, socketTimeoutDuration, [this, newConn]() { RemoveConnection(newConn); }));
         newConn->Start();
-        connections.insert(std::move(newConn));
         StartAccepting();
       }
     });

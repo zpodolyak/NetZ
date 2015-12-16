@@ -141,7 +141,11 @@ namespace Util
       {
         if (it->second.GetState() != Timer::TimerState::Running)
           it = queue.erase(it);
-        else it->second.Cancel();
+        else
+        {
+          it->second.Cancel();
+          ++it;
+        }
       }
       else ++it;
     }

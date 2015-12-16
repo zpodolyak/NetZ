@@ -66,11 +66,11 @@ namespace NetZ
     }
 
     template <typename SocketType, typename Handler>
-    void Accept(SocketType& peer, ConnectionData* conn, Handler&& handler)
+    void Accept(SocketType& peer, ConnectionData conn, Handler&& handler)
     {
       if (socket == INVALID_SOCKET)
         return;
-      service->RegisterDescriptorOperation(ReactorOps::read, new AcceptOperation<SocketType, Handler>(peer, conn, socket, std::forward<Handler>(handler)));
+      service->RegisterDescriptorOperation(ReactorOps::read, new AcceptOperation<SocketType, Handler>(peer, std::move(conn), socket, std::forward<Handler>(handler)));
     }
   };
 

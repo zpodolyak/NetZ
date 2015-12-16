@@ -17,6 +17,15 @@ namespace NetZ
   {
   }
 
+  SocketBase::~SocketBase()
+  {
+    if (IsOpen() && service)
+    {
+      service->CancelDescriptor(socket);
+      Close();
+    }
+  }
+
   SocketBase::SocketBase(SocketService* _service)
     : socket(INVALID_SOCKET)
     , service(_service)
