@@ -35,7 +35,7 @@ TEST(TestParseHeader, ParseHeaderComplete)
   inputStr = "\r\n";
   input.SetBuffer(inputStr, strlen(inputStr));
   EXPECT_FALSE(NetZ::Http::HttpParser::ParseNextHeader(input, req));
-  EXPECT_EQ(input.sc, HttpStatusCode::bad_request);
+  EXPECT_EQ(input.sc, HttpStatusCode::ok);
   inputStr = " Host: www.example.com\r\n";
   input.SetBuffer(inputStr, strlen(inputStr));
   EXPECT_FALSE(NetZ::Http::HttpParser::ParseNextHeader(input, req));

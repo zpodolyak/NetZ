@@ -45,7 +45,8 @@ namespace Http
     replyStr.append("Content-Length: ");
     auto defaultReply = GetDefaultHtmlReply(statusCode);
     replyStr.append(std::to_string(defaultReply.length()));
-    replyStr.append("Content-Type: text/html");
+    replyStr.append("\r\n");
+    replyStr.append("Content-Type: text/html\r\n\r\n");
     replyStr.append(defaultReply);
     return replyStr;
   }

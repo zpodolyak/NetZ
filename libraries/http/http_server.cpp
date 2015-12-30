@@ -47,8 +47,9 @@ namespace Http
         DebugMessage("received new HTTP connection!");
         auto it = connections.insert(make_unique<HttpConnection>(std::move(clientSocket), &service, &resource_mgr));
         auto newConn = it.first->get();
-        newConn->socketTimeoutTimer = service.AddTimer(Util::Timer(0, socketTimeoutDuration, [this, newConn]() { RemoveConnection(newConn); }));
+        newConn->socketTimeoutTimer = service.AddTimer(Util::Timer(socketTimeoutDuration, socketTimeoutDuration, [this, newConn]() { RemoveConnection(newConn); }));
         newConn->Start();
+
         StartAccepting();
       }
     });

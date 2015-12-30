@@ -11,6 +11,8 @@ namespace Http
     HttpStatusCode sc;
     const char* offset;
 
+    InputBuffer() = default;
+
     InputBuffer(const char* bufferData, std::size_t length)
       : buffer(bufferData, bufferData + length)
       , sc(HttpStatusCode::ok)
@@ -25,6 +27,8 @@ namespace Http
       offset = other.offset;
       other.offset = nullptr;
     }
+
+    InputBuffer& operator=(InputBuffer&& other) = default;
 
     const char* Start() { return buffer.data(); }
     const char* End() { return buffer.data() + buffer.size(); }

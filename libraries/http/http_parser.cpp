@@ -29,10 +29,7 @@ namespace Http
 
       bool CheckCRLF(const char* from, const char* to)
       {
-        if (from < to)
-          if (*from == crlf[0] && *(from + 1) == crlf[1])
-            return true;
-        return false;
+        return (from < to) ? *from == crlf[0] && *(from + 1) == crlf[1] : false;
       }
     }
 
@@ -113,11 +110,7 @@ namespace Http
       Header header;
       const char* p = buffer.offset;
       const char* end = buffer.End();
-      if (CheckCRLF(p, end))
-      {
-        buffer.sc = HttpStatusCode::bad_request;
-        return false;
-      }
+      if (CheckCRLF(p, end)) return false;
       
       while (p < end && 32 < *p && *p != 127) ++p;
       if (p == end)

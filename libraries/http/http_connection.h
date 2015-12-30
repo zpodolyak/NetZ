@@ -7,7 +7,8 @@ namespace NetZ
 {
 namespace Http
 {
-  constexpr uint64_t socketTimeoutDuration = 15000;
+  constexpr uint64_t socketTimeoutDuration = 150000;
+  constexpr int buffer_size = 4096;
   class ResourceManager;
   class HttpServer;
 
@@ -27,12 +28,15 @@ namespace Http
     TcpSocket socket;
     HttpMessageRequest request;
     HttpMessageResponse response;
+    
+    InputBuffer reply; // temporary hack
     ResourceManager* resource_mgr;
     SocketService* service;
     Util::TimerID socketTimeoutTimer = -1;
+    char receiveBuffer[buffer_size];
 
     void Read(HttpParser::ParseState state);
-    void Write(InputBuffer&& buffer);
+    void Write();
     void WriteDefaultResponse();
   };
 }
