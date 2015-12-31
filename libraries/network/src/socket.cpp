@@ -121,5 +121,6 @@ namespace NetZ
   void SocketBase::SetNonBlocking(bool mode)
   {
     SocketPlatform::SetNonBlocking(socket, mode);
+    isNonBlocking = mode;
   }
 }

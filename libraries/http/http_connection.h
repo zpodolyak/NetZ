@@ -7,7 +7,7 @@ namespace NetZ
 {
 namespace Http
 {
-  constexpr uint64_t socketTimeoutDuration = 15000;
+  constexpr uint64_t socketTimeoutDuration = 150000;
   constexpr int buffer_size = 4096;
   class ResourceManager;
   class HttpServer;
@@ -19,7 +19,7 @@ namespace Http
     HttpConnection(const HttpConnection&) = delete;
     HttpConnection& operator=(const HttpConnection&) = delete;
 
-    HttpConnection(TcpSocket&& _socket, SocketService* _service, ResourceManager* rMgr);
+    HttpConnection(SocketService* _service, ResourceManager* rMgr);
     ~HttpConnection() { Stop(); }
     void Start();
     void Stop();
@@ -38,6 +38,7 @@ namespace Http
     void Read(HttpParser::ParseState state);
     void Write();
     void WriteDefaultResponse();
+    TcpSocket& Socket() { return socket; }
   };
 }
 }

@@ -22,7 +22,6 @@ namespace Http
     void StartAccepting();
 
     TcpServerSocket svrSocket;
-    TcpSocket clientSocket;
     ResourceManager resource_mgr;
     SocketService service;
     std::set<std::unique_ptr<HttpConnection>> connections;

@@ -8,7 +8,6 @@ namespace Http
 {
   HttpServer::HttpServer(const ConnectionData& conn, const std::string& documentRoot)
     : svrSocket(&service, ProtocolData<Protocol::TCP>(), conn)
-    , clientSocket(&service)
     , resource_mgr(documentRoot)
     , service()
   {
@@ -40,17 +39,18 @@ namespace Http
 
   void HttpServer::StartAccepting()
   {
-    svrSocket.Accept(clientSocket, svrSocket.LocalConnection(), [this](const std::error_code& ec)
+    auto it = connections.insert(make_unique<HttpConnection>(&service, &resource_mgr));
+    auto newConn = it.first->get();
+    newConn->socketTimeoutTimer = service.AddTimer(Util::Timer(socketTimeoutDuration, socketTimeoutDuration, [this, newConn]() { RemoveConnection( newConn ); }));
+
+    svrSocket.Accept(newConn->Socket(), svrSocket.LocalConnection(), [this, newConn](const std::error_code& ec)
     {
       if (!ec)
       {
         DebugMessage("received new HTTP connection!");
-        auto it = connections.insert(make_unique<HttpConnection>(std::move(clientSocket), &service, &resource_mgr));
-        auto newConn = it.first->get();
-        newConn->socketTimeoutTimer = service.AddTimer(Util::Timer(socketTimeoutDuration, socketTimeoutDuration, [this, newConn]() { RemoveConnection(newConn); }));
         newConn->Start();
-        StartAccepting();
       }
+      StartAccepting();
     });
   }
 }

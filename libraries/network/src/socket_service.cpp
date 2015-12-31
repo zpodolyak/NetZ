@@ -12,7 +12,10 @@ namespace NetZ
 
   void SocketService::RegisterDescriptorOperation(int type, ReactorOperation* op)
   {
-    reactor.RegisterDescriptorOperation(type, op);
+    if (reactor.HasRegisteredDescriptor(type, op))
+      waitingOps.push_back(std::make_pair(type, op));
+    else
+      reactor.RegisterDescriptorOperation(type, op);
   }
 
   void SocketService::CancelDescriptor(SocketHandle fd)
@@ -59,10 +62,5 @@ namespace NetZ
   bool SocketService::IsRunning() const
   {
     return reactor.IsRunning();
-  }
-
-  void SocketService::AddToWaitingList(int type, ReactorOperation* op)
-  {
-    waitingOps.push_back(std::make_pair(type, op));
   }
 }

@@ -8,8 +8,8 @@ namespace NetZ
 {
 namespace Http
 {
-  HttpConnection::HttpConnection(TcpSocket&& _socket, SocketService* _service, ResourceManager* rMgr)
-    : socket(std::move(_socket))
+  HttpConnection::HttpConnection(SocketService* _service, ResourceManager* rMgr)
+    : socket(_service)
     , resource_mgr(rMgr)
     , service(_service)
   {
