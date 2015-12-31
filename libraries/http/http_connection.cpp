@@ -61,14 +61,14 @@ namespace Http
           }
           else
           {
-            reply = resource_mgr->ToResource()->ToBuffer();
+            reply = resource_mgr->ToReplyBuffer(response);
             Write();
           }
         }
         else if (request.method == "POST")
         {
           resource_mgr->AddResource(request, response);
-          reply = resource_mgr->ToResource()->ToBuffer();
+          reply = resource_mgr->ToReplyBuffer(response);
           Write();
         }
       }

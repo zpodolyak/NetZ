@@ -17,8 +17,10 @@ namespace NetZ
     virtual void Run() override;
     virtual void Stop() override;
     virtual bool IsRunning() const override;
+    void AddToWaitingList(int type, ReactorOperation* op);
   private:
     Reactor reactor;
     Util::TimerHost timers;
+    std::deque<std::pair<int, ReactorOperation*>> waitingOps;
   };
 }

@@ -7,7 +7,7 @@ namespace NetZ
 {
 namespace Http
 {
-  constexpr uint64_t socketTimeoutDuration = 150000;
+  constexpr uint64_t socketTimeoutDuration = 15000;
   constexpr int buffer_size = 4096;
   class ResourceManager;
   class HttpServer;

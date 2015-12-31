@@ -70,7 +70,10 @@ namespace NetZ
     {
       if (socket == INVALID_SOCKET)
         return;
-      service->RegisterDescriptorOperation(ReactorOps::read, new AcceptOperation<SocketType, Handler>(peer, std::move(conn), socket, std::forward<Handler>(handler)));
+      if (!peer.IsOpen())
+        service->RegisterDescriptorOperation(ReactorOps::read, new AcceptOperation<SocketType, Handler>(peer, std::move(conn), socket, std::forward<Handler>(handler)));
+      //else
+      //  service->AddToWaitingList(ReactorOps::read, new AcceptOperation<SocketType, Handler>(peer, std::move(conn), socket, std::forward<Handler>(handler)));
     }
   };
 

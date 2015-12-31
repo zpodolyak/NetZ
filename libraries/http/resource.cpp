@@ -10,14 +10,14 @@ namespace Http
   constexpr int read_size = 8192;
 
   FileResource::FileResource(std::string file)
-    : rawData(read_size)
+    : rawData()
     , path(std::move(file))
   {
   }
 
   bool FileResource::Load()
   {
-    std::ifstream is(path.c_str(), std::ios::in | std::ios::binary);
+    std::ifstream is(path.c_str(), std::ios::in);
     if (is)
     {
       char buffer[read_size];

@@ -49,7 +49,6 @@ namespace Http
         auto newConn = it.first->get();
         newConn->socketTimeoutTimer = service.AddTimer(Util::Timer(socketTimeoutDuration, socketTimeoutDuration, [this, newConn]() { RemoveConnection(newConn); }));
         newConn->Start();
-
         StartAccepting();
       }
     });

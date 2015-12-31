@@ -39,6 +39,16 @@ namespace NetZ
   {
     reactor.Run();
     timers.RunTimers();
+
+    auto it = std::begin(waitingOps);
+    while (it != std::end(waitingOps))
+    {
+      if (!reactor.HasRegisteredDescriptor(it->first, it->second))
+      {
+        reactor.RegisterDescriptorOperation(it->first, it->second);
+        it = waitingOps.erase(it);
+      }
+    }
   }
 
   void SocketService::Stop()
@@ -49,5 +59,10 @@ namespace NetZ
   bool SocketService::IsRunning() const
   {
     return reactor.IsRunning();
+  }
+
+  void SocketService::AddToWaitingList(int type, ReactorOperation* op)
+  {
+    waitingOps.push_back(std::make_pair(type, op));
   }
 }

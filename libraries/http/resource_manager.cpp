@@ -28,7 +28,11 @@ namespace Http
     if (lastDotPos != std::string::npos && lastSlashPos < lastDotPos)
     {
       selectedResource = make_unique<FileResource>(fullPath);
-      return selectedResource->Load();
+      if (selectedResource->Load())
+      {
+        response.statusCode = HttpStatusCode::ok;
+        return true;
+      }
     }
     return false;
   }
@@ -38,9 +42,20 @@ namespace Http
     return false;
   }
 
-  Resource* ResourceManager::ToResource() const
+  InputBuffer ResourceManager::ToReplyBuffer(HttpMessageResponse& response) const
   {
-    return selectedResource.get();
+    InputBuffer replyBuff;
+    if (selectedResource)
+    {
+      replyBuff.Append(response.GetStatusString());
+      std::string headerString("Content-Length: ");
+      headerString.append(std::to_string(selectedResource->Size()));
+      headerString.append("\r\n");
+      headerString.append("Content-Type: text/html\r\n\r\n");
+      replyBuff.Append(std::move(headerString));
+      replyBuff.Append(selectedResource->ToBuffer().Start(), selectedResource->Size());
+    }
+    return replyBuff;
   }
 }
 }

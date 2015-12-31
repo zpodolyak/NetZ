@@ -11,7 +11,12 @@ namespace Http
     HttpStatusCode sc;
     const char* offset;
 
-    InputBuffer() = default;
+    InputBuffer()
+      : buffer()
+      , sc(HttpStatusCode::ok)
+      , offset(Start())
+    {
+    }
 
     InputBuffer(const char* bufferData, std::size_t length)
       : buffer(bufferData, bufferData + length)
@@ -46,6 +51,11 @@ namespace Http
     void Append(const char* bufferData, std::size_t length)
     {
       buffer.insert(std::end(buffer), bufferData, bufferData + length);
+    }
+
+    void Append(std::string&& str)
+    {
+      Append(str.c_str(), str.length());
     }
 
     void SetBuffer(const char* bufferData, std::size_t length)

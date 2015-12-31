@@ -44,6 +44,15 @@ namespace NetZ
     }
   }
 
+  bool Reactor::HasRegisteredDescriptor(int type, ReactorOperation* op)
+  {
+    if (!(type < ReactorOps::max_ops))
+      return false;
+
+    auto it = taskQueue[type].find(op->descriptor);
+    return it != std::end(taskQueue[type]);
+  }
+
   void Reactor::Run(int timeout)
   {
     std::error_code ec;
@@ -62,10 +71,15 @@ namespace NetZ
       for (int i = ReactorOps::max_ops - 1; i >= 0; --i)
         for (std::size_t j = 0; j < fds[i].fd_count; ++j)
         { 
-          auto op = taskQueue[i][fds[i].fd_array[j]].front();
-          op->RunOperation(ec);
-          delete op;
-          taskQueue[i][fds[i].fd_array[j]].pop_front();
+          auto it = taskQueue[i].find(fds[i].fd_array[j]);
+          while (!it->second.empty())
+          {
+            auto op = it->second.front();
+            op->RunOperation(ec);
+            delete op;
+            it->second.pop_front();
+          }
+          taskQueue[i].erase(it);
         }
   }
 

@@ -16,7 +16,7 @@ namespace Http
     
     bool GetResource(const HttpMessageRequest& request, HttpMessageResponse& response);
     bool AddResource(const HttpMessageRequest& request, HttpMessageResponse& response);
-    Resource* ToResource() const;
+    InputBuffer ToReplyBuffer(HttpMessageResponse& response) const;
   private:
     std::string documentRoot;
     std::unique_ptr<Resource> selectedResource;
