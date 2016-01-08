@@ -13,6 +13,7 @@ namespace Http
     , resource_mgr(rMgr)
     , service(_service)
   {
+    socket.SetNonBlocking(true);
   }
 
   void HttpConnection::Start()
@@ -71,6 +72,10 @@ namespace Http
           reply = resource_mgr->ToReplyBuffer(response);
           Write();
         }
+      }
+      else
+      {
+        DebugMessage("no data received from socket %d", socket.Handle());
       }
     });
   }

@@ -75,9 +75,9 @@ namespace NetZ
           while (!it->second.empty())
           {
             auto op = it->second.front();
+            it->second.pop_front();
             op->RunOperation(ec);
             delete op;
-            it->second.pop_front();
           }
           taskQueue[i].erase(it);
         }

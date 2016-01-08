@@ -22,6 +22,8 @@ namespace NetZ
     {
       ReceiveOperation* rcvOp(static_cast<ReceiveOperation*>(op));
       rcvOp->bytes_transferred = ErrorWrapper(::recv(rcvOp->descriptor, rcvOp->buffer, rcvOp->length, rcvOp->flags), ec);
+      if (rcvOp->bytes_transferred == 0)
+        ec = std::make_error_code(std::errc::connection_aborted);
       rcvOp->CompleteOperation(ec);
     }
 

@@ -88,6 +88,7 @@ namespace NetZ
       }
     }
 
+    SocketHandle Handle() const;
     void Close();
 
     std::error_code GetSocketOption(SocketOption& opt) const;

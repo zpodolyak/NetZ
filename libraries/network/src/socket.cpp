@@ -65,6 +65,11 @@ namespace NetZ
     return ErrorWrapper(::connect(socket,(const sockaddr*)socketAddress, sizeof(sockaddr_in)), ec); 
   }
 
+  SocketHandle SocketBase::Handle() const
+  {
+    return socket;
+  }
+
   void SocketBase::Close()
   {
     SocketPlatform::Close(socket);

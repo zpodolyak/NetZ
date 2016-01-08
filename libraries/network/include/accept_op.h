@@ -17,10 +17,10 @@ namespace NetZ
 
     }
 
-    static void DoAccept( ReactorOperation* op, std::error_code& ec )
+    static void DoAccept(ReactorOperation* op, std::error_code& ec)
     {
-      AcceptOperation* accOp( static_cast<AcceptOperation*>( op ) );
-      if ( accOp->descriptor == INVALID_SOCKET )
+      AcceptOperation* accOp(static_cast<AcceptOperation*>(op));
+      if (accOp->descriptor == INVALID_SOCKET)
         return;
 
 #ifdef WIN32
@@ -28,11 +28,11 @@ namespace NetZ
 #else
       std::size_t addrLen = 0;
 #endif
-      addrLen = sizeof( accOp->connData.data );
+      addrLen = sizeof(accOp->connData.data);
       sockaddr* addr = (sockaddr*)&accOp->connData.data;
-      auto newSocket = ErrorWrapper( ::accept( accOp->descriptor, addr, &addrLen ), ec );
-      if ( !ec ) ec = accOp->peer.Assign( newSocket );
-      accOp->CompleteOperation( ec );
+      auto newSocket = ErrorWrapper(::accept(accOp->descriptor, addr, &addrLen ), ec);
+      if (!ec) ec = accOp->peer.Assign(newSocket);
+      accOp->CompleteOperation(ec);
     }
 
     void CompleteOperation(std::error_code& ec)

@@ -18,6 +18,7 @@ namespace Http
   bool FileResource::Load()
   {
     std::ifstream is(path.c_str(), std::ios::in);
+    DebugMessage("loading %s", path.c_str());
     if (is)
     {
       char buffer[read_size];
