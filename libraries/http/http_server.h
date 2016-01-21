@@ -21,9 +21,9 @@ namespace Http
   private:
     void StartAccepting();
 
+    SocketService service;
     TcpServerSocket svrSocket;
     ResourceManager resource_mgr;
-    SocketService service;
     std::set<std::unique_ptr<HttpConnection>> connections;
   };
 }

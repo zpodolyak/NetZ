@@ -14,10 +14,10 @@ namespace NetZ
 
     void SetNonBlocking(SocketHandle socket, bool mode)
     {
-      int flags = ::fcntl(socket, F_GETFL, 0);
-
-      if (flags < 0 || ::fcntl(socket, F_SETFL, flags | O_NONBLOCK) < 0)
-        PrintError("fcntl failed");
+      u_long arg = (mode ? 1 : 0);
+      std::error_code ec;
+      if (ErrorWrapper(::ioctl(socket, FIONBIO, &arg), ec))
+        PrintError(ec);
     }
 
     void Close(SocketHandle socket)

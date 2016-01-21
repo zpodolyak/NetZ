@@ -13,11 +13,11 @@ namespace Http
     , resource_mgr(rMgr)
     , service(_service)
   {
-    socket.SetNonBlocking(true);
   }
 
   void HttpConnection::Start()
   {
+    socket.SetNonBlocking(true);
     Read(HttpParser::ParseState::RequestParsing);
   }
 

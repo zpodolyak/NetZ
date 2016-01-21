@@ -35,7 +35,7 @@ namespace NetZ
       accOp->CompleteOperation(ec);
     }
 
-    void CompleteOperation(std::error_code& ec)
+    void CompleteOperation(const std::error_code& ec)
     {
       handler(ec);
     }

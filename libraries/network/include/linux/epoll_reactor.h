@@ -10,6 +10,7 @@ namespace NetZ
 
     void RegisterDescriptorOperation(int type, ReactorOperation* op);
     void CancelDescriptor(SocketHandle fd);
+    bool HasRegisteredDescriptor(int type, ReactorOperation* op);
 
     void Run(int timeout = 200);
     void Stop() { shutdown = true; }

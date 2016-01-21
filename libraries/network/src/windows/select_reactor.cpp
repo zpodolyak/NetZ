@@ -72,14 +72,17 @@ namespace NetZ
         for (std::size_t j = 0; j < fds[i].fd_count; ++j)
         { 
           auto it = taskQueue[i].find(fds[i].fd_array[j]);
-          while (!it->second.empty())
+          if (it != std::end(taskQueue[i]))
           {
-            auto op = it->second.front();
-            it->second.pop_front();
-            op->RunOperation(ec);
-            delete op;
+            while (!it->second.empty())
+            {
+              auto op = it->second.front();
+              it->second.pop_front();
+              op->RunOperation(ec);
+              delete op;
+            }
+            taskQueue[i].erase(it);
           }
-          taskQueue[i].erase(it);
         }
   }
 

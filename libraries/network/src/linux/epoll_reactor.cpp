@@ -83,11 +83,21 @@ void Reactor::CancelDescriptor(SocketHandle fd)
   }
 }
 
+bool Reactor::HasRegisteredDescriptor(int type, ReactorOperation* op)
+{
+  if (!(type < ReactorOps::max_ops))
+    return false;
+
+  auto it = taskQueue[type].find(op->descriptor);
+  return it != std::end(taskQueue[type]);
+}
+
 void Reactor::Run(int timeout)
 {
   std::error_code ec;
   epoll_event events[128];
-  std::vector<ReactorOperation*> readyOps;
+  static const int flag[ReactorOps::max_ops] = { EPOLLIN, EPOLLOUT, EPOLLPRI };
+  std::vector<std::pair<uint32_t, ReactorOperation*>> readyOps;
   ReactorOpsCleanup cleanupOps;
 
   int num_events = epoll_wait(epoll_fd, events, 128, timeout);
@@ -98,19 +108,29 @@ void Reactor::Run(int timeout)
     {
       void* ptr = events[i].data.ptr;
       auto op = static_cast<ReactorOperation*>(ptr);
-      readyOps.push_back(op);
+      readyOps.push_back(std::make_pair(events[i].events, op));
     }
   }
 
   for (int i = ReactorOps::max_ops - 1; i >= 0; --i)
     for (std::size_t j = 0; j < readyOps.size(); ++j)
-      for (auto it = taskQueue[i][readyOps[j]->descriptor].begin(); it != taskQueue[i][readyOps[j]->descriptor].end();)
+    {
+      if (readyOps[j].first & (flag[j] | EPOLLERR | EPOLLHUP))
       {
-        auto rOp = *it;
-        rOp->RunOperation(ec);
-        cleanupOps.cl.push_back(rOp);
-        it = taskQueue[i][readyOps[j]->descriptor].erase(it);
+        auto it = taskQueue[i].find(readyOps[j].second->descriptor);
+        if (it != std::end(taskQueue[i]))
+        {
+          while (!it->second.empty())
+          {
+            auto rOp = it->second.front();
+            it->second.pop_front();
+            rOp->RunOperation(ec);
+            cleanupOps.cl.push_back(rOp);
+          } 
+          taskQueue[i].erase(it);
+        }
       }
+    }
 } 
 
 }
