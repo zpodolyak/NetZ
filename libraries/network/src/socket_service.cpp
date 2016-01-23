@@ -10,10 +10,15 @@ namespace NetZ
   {
   }
 
-  void SocketService::RegisterDescriptorOperation(int type, ReactorOperation* op)
+  void SocketService::RegisterDescriptor(SocketHandle fd)
   {
-    if (!reactor.HasRegisteredDescriptor(type, op))
-      reactor.RegisterDescriptorOperation(type, op);
+    reactor.RegisterDescriptor(fd);
+  }
+
+  void SocketService::RegisterOperation(int type, ReactorOperation* op)
+  {
+    if (!reactor.HasRegisteredOperation(type, op))
+      reactor.RegisterOperation(type, op);
     else
       waitingOps.push_back(std::make_pair(type, op));
   }
@@ -43,7 +48,7 @@ namespace NetZ
     auto it = std::begin(waitingOps);
     while (it != std::end(waitingOps))
     {
-      reactor.RegisterDescriptorOperation(it->first, it->second);
+      reactor.RegisterOperation(it->first, it->second);
       it = waitingOps.erase(it);
     }
     reactor.Run();

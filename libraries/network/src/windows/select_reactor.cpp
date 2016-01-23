@@ -16,13 +16,18 @@ namespace NetZ
     Stop();
   }
 
-  void Reactor::RegisterDescriptorOperation(int type, ReactorOperation* op)
+  void Reactor::RegisterOperation(int type, ReactorOperation* op)
   {
     if (!(type < ReactorOps::max_ops) && op->descriptor == INVALID_SOCKET)
       return;
 
     auto it = taskQueue[type].emplace(std::piecewise_construct, std::forward_as_tuple(op->descriptor), std::forward_as_tuple());
     it.first->second.push_back(op);
+  }
+  
+  void Reactor::RegisterDescriptor(SocketHandle fd)
+  {
+
   }
 
   void Reactor::CancelDescriptor(SocketHandle fd)
@@ -44,7 +49,7 @@ namespace NetZ
     }
   }
 
-  bool Reactor::HasRegisteredDescriptor(int type, ReactorOperation* op)
+  bool Reactor::HasRegisteredOperation(int type, ReactorOperation* op)
   {
     if (!(type < ReactorOps::max_ops))
       return false;

@@ -42,6 +42,8 @@ namespace NetZ
     if (IsOpen())
       return std::make_error_code(std::errc::already_connected);
     socket = _socket;
+    if (service)
+      service->RegisterDescriptor(socket);
     return std::error_code();
   }
 

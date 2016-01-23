@@ -36,28 +36,34 @@ Reactor::~Reactor()
     close(epoll_fd);
 }
 
-void Reactor::RegisterDescriptorOperation(int type, ReactorOperation* op)
+void Reactor::RegisterOperation(int type, ReactorOperation* op)
 {
   if (!(type < ReactorOps::max_ops) && op->descriptor == INVALID_SOCKET)
     return;
 
-  epoll_event ev = { 0,{ 0 } };
-  ev.data.ptr = op;
   auto it = taskQueue[type].emplace(std::piecewise_construct, std::forward_as_tuple(op->descriptor), std::forward_as_tuple());
-  if (it.second)
-  {
-    ev.events = EPOLLIN | EPOLLERR | EPOLLHUP | EPOLLPRI | EPOLLET;
-    int result = epoll_ctl(epoll_fd, EPOLL_CTL_ADD, op->descriptor, &ev);
-    if (result != 0)
-      PrintError("Failed to add descriptor to epoll.");
-  }
   if (it.first->second.empty())
   {
+    epoll_event ev = { 0,{ 0 } };
+    ev.events = EPOLLIN | EPOLLERR | EPOLLHUP | EPOLLPRI | EPOLLET;
+    ev.data.ptr = op;
     if (type == ReactorOps::write)
       ev.events |= EPOLLOUT;
     epoll_ctl(epoll_fd, EPOLL_CTL_MOD, op->descriptor, &ev);
   }
   it.first->second.push_back(op);
+}
+
+void Reactor::RegisterDescriptor(SocketHandle fd)
+{
+  if (fd == INVALID_SOCKET)
+    return;
+
+  epoll_event ev = { 0,{ 0 } };
+  ev.events = EPOLLIN | EPOLLERR | EPOLLHUP | EPOLLPRI | EPOLLET;
+  int result = epoll_ctl(epoll_fd, EPOLL_CTL_ADD, fd, &ev);
+  if (result != 0)
+    PrintError("Failed to add descriptor to epoll.");
 }
 
 void Reactor::CancelDescriptor(SocketHandle fd)
@@ -69,21 +75,17 @@ void Reactor::CancelDescriptor(SocketHandle fd)
     {
       while (!it->second.empty())
       {
-        auto op = it->second.front();
-        //auto ec = std::make_error_code(std::errc::operation_canceled);
-
-        epoll_event ev = { 0,{ 0 } };
-        epoll_ctl(epoll_fd, EPOLL_CTL_DEL, op->descriptor, &ev);
-
         delete it->second.front();
         it->second.pop_front();
       }
       taskQueue[i].erase(it);
     }
   }
+  epoll_event ev = { 0,{ 0 } };
+  epoll_ctl(epoll_fd, EPOLL_CTL_DEL, fd, &ev);
 }
 
-bool Reactor::HasRegisteredDescriptor(int type, ReactorOperation* op)
+bool Reactor::HasRegisteredOperation(int type, ReactorOperation* op)
 {
   if (!(type < ReactorOps::max_ops))
     return false;
@@ -115,7 +117,7 @@ void Reactor::Run(int timeout)
   for (int i = ReactorOps::max_ops - 1; i >= 0; --i)
     for (std::size_t j = 0; j < readyOps.size(); ++j)
     {
-      if (readyOps[j].first & (flag[j] | EPOLLERR | EPOLLHUP))
+      if (readyOps[j].first & (flag[i] | EPOLLERR | EPOLLHUP))
       {
         auto it = taskQueue[i].find(readyOps[j].second->descriptor);
         if (it != std::end(taskQueue[i]))

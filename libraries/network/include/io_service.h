@@ -9,7 +9,8 @@ namespace NetZ
   {
   public:
     virtual ~IoService() {}
-    virtual void RegisterDescriptorOperation(int, ReactorOperation*) = 0;
+    virtual void RegisterDescriptor(SocketHandle) = 0;
+    virtual void RegisterOperation(int, ReactorOperation*) = 0;
     virtual void CancelDescriptor(SocketHandle) = 0;
     virtual Util::TimerID AddTimer(Util::Timer&& timer) = 0;
     virtual void CancelTimer(Util::TimerID timerID) = 0;

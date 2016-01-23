@@ -31,7 +31,8 @@ namespace NetZ
       addrLen = sizeof(accOp->connData.data);
       sockaddr* addr = (sockaddr*)&accOp->connData.data;
       auto newSocket = ErrorWrapper(::accept(accOp->descriptor, addr, &addrLen ), ec);
-      if (!ec) ec = accOp->peer.Assign(newSocket);
+      if (!ec) 
+        ec = accOp->peer.Assign(newSocket);
       accOp->CompleteOperation(ec);
     }
 

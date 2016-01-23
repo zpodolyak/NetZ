@@ -56,6 +56,8 @@ namespace NetZ
         PrintError(ec);
         return false;
       }
+      if (service)
+        service->RegisterDescriptor(socket);
       return true;
     }
     
@@ -83,7 +85,7 @@ namespace NetZ
         if (ec == std::errc::operation_in_progress || ec == std::errc::operation_would_block)
 #endif
         {
-          service->RegisterDescriptorOperation(ReactorOps::connect, op);
+          service->RegisterOperation(ReactorOps::connect, op);
         }
       }
     }

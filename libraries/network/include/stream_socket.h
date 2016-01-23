@@ -51,7 +51,7 @@ namespace NetZ
     {
       if (socket == INVALID_SOCKET || !service)
         return;
-      service->RegisterDescriptorOperation(ReactorOps::write, new SendOperation<Handler>(buffer, length, msg_flags, socket, std::forward<Handler>(handler)));
+      service->RegisterOperation(ReactorOps::write, new SendOperation<Handler>(buffer, length, msg_flags, socket, std::forward<Handler>(handler)));
     }
 
     int Receive(char* buffer, int length, int msg_flags = 0)
@@ -75,7 +75,7 @@ namespace NetZ
     {
       if (socket == INVALID_SOCKET || !service)
         return;
-      service->RegisterDescriptorOperation(ReactorOps::read, new ReceiveOperation<Handler>(buffer, length, msg_flags, socket, std::forward<Handler>(handler)));
+      service->RegisterOperation(ReactorOps::read, new ReceiveOperation<Handler>(buffer, length, msg_flags, socket, std::forward<Handler>(handler)));
     }
   };
 

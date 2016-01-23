@@ -7,10 +7,11 @@ namespace NetZ
   public:
     Reactor();
     ~Reactor();
-
-    void RegisterDescriptorOperation(int type, ReactorOperation* op);
+    
+    void RegisterDescriptor(SocketHandle fd);
+    void RegisterOperation(int type, ReactorOperation* op);
     void CancelDescriptor(SocketHandle fd);
-    bool HasRegisteredDescriptor(int type, ReactorOperation* op);
+    bool HasRegisteredOperation(int type, ReactorOperation* op);
 
     void Run(int timeout = 200);
     void Stop();

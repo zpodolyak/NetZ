@@ -9,7 +9,8 @@ namespace NetZ
   public:
     SocketService();
 
-    virtual void RegisterDescriptorOperation(int type, ReactorOperation* op) override;
+    virtual void RegisterDescriptor(SocketHandle fd) override;
+    virtual void RegisterOperation(int type, ReactorOperation* op) override;
     virtual void CancelDescriptor(SocketHandle fd) override;
     virtual Util::TimerID AddTimer(Util::Timer&& timer) override;
     virtual void CancelTimer(Util::TimerID timerID) override;

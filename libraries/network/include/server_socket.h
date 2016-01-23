@@ -68,11 +68,11 @@ namespace NetZ
     template <typename SocketType, typename Handler>
     void Accept(SocketType& peer, ConnectionData conn, Handler&& handler)
     {
-      if (socket == INVALID_SOCKET)
+      if (socket == INVALID_SOCKET || !service)
         return;
       auto op = new AcceptOperation<SocketType, Handler>(peer, std::move(conn), socket, std::forward<Handler>(handler));
-      if ( !peer.IsOpen() )
-        service->RegisterDescriptorOperation( ReactorOps::read, op );
+      if (!peer.IsOpen())
+        service->RegisterOperation(ReactorOps::read, op);
       else
         op->CompleteOperation(std::make_error_code(std::errc::already_connected));
     }
