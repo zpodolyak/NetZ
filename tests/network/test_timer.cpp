@@ -152,11 +152,17 @@ TEST(SingleTimerThread, TestTimerThread)
   t.Schedule(2000, 1000, [&cObj, &periodCount]() 
   { 
     cObj.CallMe(); 
-    ++periodCount; 
+    ++periodCount;
   });
   t.RunInThread();
-  while (periodCount < 3);
-  t.Cancel();
+  while (t.GetState() != Timer::TimerState::Cancelled)
+  {
+    if (periodCount > 2)
+    {
+      t.Cancel();
+      std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
+  }
 }
 
 #include "libraries/network/src/timer.cpp"
