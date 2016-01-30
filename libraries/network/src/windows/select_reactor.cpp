@@ -68,7 +68,7 @@ namespace NetZ
         FD_SET(fd.first, &fds[i]);
     }
 
-    timeval tv_buf = { 0, 0 };
+    timeval tv_buf = { timeout/1000, 0 };
     auto result = ErrorWrapper(::select(0, &fds[ReactorOps::read],
       &fds[ReactorOps::write], &fds[ReactorOps::error], &tv_buf), ec);
 
