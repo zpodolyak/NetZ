@@ -1,5 +1,6 @@
 #include "libraries/common.h"
 #include "libraries/network/include/network.h"
+#include "libraries/network/include/timer.h"
 #include "example_helper.h"
 
 using NetZ::Protocol;
@@ -37,7 +38,7 @@ int main(int argc, char* argv[])
           SampleRecord rec;
           rec.Load(dataBuffer);
           rec.DumpRecord();
-          service.Stop();
+          service.AddTimer(NetZ::Util::Timer(5000, 5000, []() { service.Stop(); }));
         }
       });
     }
