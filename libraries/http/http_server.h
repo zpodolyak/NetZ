@@ -24,7 +24,7 @@ namespace Http
     SocketService service;
     TcpServerSocket svrSocket;
     ResourceManager resource_mgr;
-    std::set<std::unique_ptr<HttpConnection>> connections;
+    std::vector<std::unique_ptr<HttpConnection>> connections;
   };
 }
 }

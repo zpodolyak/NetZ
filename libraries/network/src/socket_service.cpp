@@ -18,9 +18,13 @@ namespace NetZ
   void SocketService::RegisterOperation(int type, ReactorOperation* op)
   {
     if (!reactor.HasRegisteredOperation(type, op))
+    {
       reactor.RegisterOperation(type, op);
+    }
     else
+    {
       waitingOps.push_back(std::make_pair(type, op));
+    }
   }
 
   void SocketService::CancelDescriptor(SocketHandle fd)

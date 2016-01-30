@@ -28,8 +28,8 @@ namespace Http
   private:
     HttpMessageRequest request;
     HttpMessageResponse response;
-    
-    InputBuffer reply; // temporary hack
+
+    InputBuffer reply;
     ResourceManager* resource_mgr;
     SocketService* service;
     Util::TimerID socketTimeoutTimer = -1;
