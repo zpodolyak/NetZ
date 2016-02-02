@@ -51,6 +51,7 @@ namespace NetZ
   {
     if(socket == INVALID_SOCKET)
       return;
+    ClearLastError();
     
     if (::bind(socket, (sockaddr*)&conn.data, sizeof(sockaddr_in)) < 0)
       PrintError("SocketBase::Bind"); 
@@ -58,6 +59,7 @@ namespace NetZ
 
   int SocketBase::Connect(const ConnectionData& conn)
   {
+    ClearLastError();
     std::error_code ec;
     const sockaddr_in *socketAddress = &conn.data;
 
@@ -74,6 +76,7 @@ namespace NetZ
 
   void SocketBase::Close()
   {
+    ClearLastError();
     SocketPlatform::Close(socket);
     socket = INVALID_SOCKET;
   }
@@ -82,6 +85,7 @@ namespace NetZ
   {
     if (socket == INVALID_SOCKET)
       return std::make_error_code(std::errc::bad_file_descriptor);
+    ClearLastError();
     std::error_code ec;
 #ifdef WIN32
     auto optLen = int(opt.Size());
@@ -96,6 +100,7 @@ namespace NetZ
   {
     if (socket == INVALID_SOCKET)
       return std::make_error_code(std::errc::bad_file_descriptor);
+    ClearLastError();
     std::error_code ec;
     ErrorWrapper(::setsockopt(socket, opt.level, opt.name, (const char*)opt.ValueData(), (int)opt.Size()), ec);
     return ec;
@@ -104,6 +109,7 @@ namespace NetZ
 
   ConnectionData SocketBase::LocalConnection() const
   {
+    ClearLastError();
     ConnectionData cd;
     int len = int(cd.Size());
     if (::getsockname(socket, (sockaddr*)&cd.data, (socklen_t*)&len))
@@ -113,6 +119,7 @@ namespace NetZ
   
   ConnectionData SocketBase::RemoteConnection() const
   {
+    ClearLastError();
     ConnectionData cd;
     int len = int(cd.Size());
     if (::getpeername(socket, (sockaddr*)&cd.data, (socklen_t*)&len))
@@ -127,6 +134,7 @@ namespace NetZ
 
   void SocketBase::SetNonBlocking(bool mode)
   {
+    ClearLastError();
     SocketPlatform::SetNonBlocking(socket, mode);
     isNonBlocking = mode;
   }

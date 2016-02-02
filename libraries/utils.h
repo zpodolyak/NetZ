@@ -22,6 +22,15 @@ inline int ErrorWrapper(int return_value, std::error_code& ec)
   return return_value;
 }
 
+inline void ClearLastError()
+{
+#ifdef WIN32
+  WSASetLastError(0);
+#else
+  errno = 0;
+#endif
+}
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wformat-security"
 

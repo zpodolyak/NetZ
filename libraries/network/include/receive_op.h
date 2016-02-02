@@ -20,6 +20,7 @@ namespace NetZ
 
     static void DoReceive(ReactorOperation* op, std::error_code& ec)
     {
+      ClearLastError();
       ReceiveOperation* rcvOp(static_cast<ReceiveOperation*>(op));
       rcvOp->bytes_transferred = ErrorWrapper(::recv(rcvOp->descriptor, rcvOp->buffer, rcvOp->length, rcvOp->flags), ec);
       if (rcvOp->bytes_transferred == 0)

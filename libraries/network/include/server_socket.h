@@ -38,6 +38,7 @@ namespace NetZ
       if (socket == INVALID_SOCKET)
         return;
 
+      ClearLastError();
       std::error_code ec;
       if (ErrorWrapper(::listen(socket, SOMAXCONN), ec) < 0)
         PrintError(ec);
@@ -48,6 +49,7 @@ namespace NetZ
     {
       if (socket == INVALID_SOCKET)
         return;
+      ClearLastError();
       std::error_code ec;
 #ifdef WIN32
       int addrLen = 0;

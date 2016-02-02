@@ -19,6 +19,7 @@ namespace NetZ
 
     static void DoAccept(ReactorOperation* op, std::error_code& ec)
     {
+      ClearLastError();
       AcceptOperation* accOp(static_cast<AcceptOperation*>(op));
       if (accOp->descriptor == INVALID_SOCKET)
         return;

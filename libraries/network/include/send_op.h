@@ -20,6 +20,7 @@ namespace NetZ
 
     static void DoSend(ReactorOperation* op, std::error_code& ec)
     {
+      ClearLastError();
       SendOperation* sndOp(static_cast<SendOperation*>(op));
       sndOp->bytes_transferred = ErrorWrapper(::send(sndOp->descriptor, sndOp->buffer, sndOp->length, sndOp->flags), ec);
       sndOp->CompleteOperation(ec);

@@ -33,11 +33,12 @@ namespace Http
     {
       if ((*conn).get() == connection)
       {
-        if (connection->socket.IsOpen()) connection->Stop();
         conn = connections.erase(conn);
       }
       else ++conn;
     }
+    if (connections.empty())
+      StartAccepting();
   }
 
   void HttpServer::StartAccepting()

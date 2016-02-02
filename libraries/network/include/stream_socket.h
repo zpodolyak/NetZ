@@ -33,6 +33,7 @@ namespace NetZ
 
     int Send(const char* buffer, int length, int msg_flags)
     {
+      ClearLastError();
       std::error_code ec;
       int bytes = ErrorWrapper(::send(socket, buffer, length, msg_flags), ec);
 #ifndef WIN32
@@ -56,6 +57,7 @@ namespace NetZ
 
     int Receive(char* buffer, int length, int msg_flags = 0)
     {
+      ClearLastError();
       std::error_code ec;
       int bytes = ErrorWrapper(::recv(socket, buffer, length, msg_flags), ec);
 #ifndef WIN32

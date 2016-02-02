@@ -49,6 +49,7 @@ namespace NetZ
     template <typename ProtocolType>
     bool Open(const ProtocolType& prot)
     {
+      ClearLastError();
       std::error_code ec;
       socket = ErrorWrapper(::socket(prot.family, prot.type, prot.protocol), ec);
       if(socket == INVALID_SOCKET)
@@ -70,6 +71,7 @@ namespace NetZ
     template <typename Handler>
     void Connect(const ConnectionData& conn, Handler&& handler)
     {
+      ClearLastError();
       std::error_code ec;
       const sockaddr_in *socketAddress = &conn.data;
       if (socket == INVALID_SOCKET || !socketAddress || !service)

@@ -73,10 +73,6 @@ namespace Http
           Write();
         }
       }
-      else
-      {
-        DebugMessage("no data received from socket %d", socket.Handle());
-      }
     });
   }
 
@@ -84,12 +80,11 @@ namespace Http
   {
     socket.Send(static_cast<const char*>(reply), reply.buffer.size(), 0, [this](int bytes_transferred, const std::error_code& ec)
     {
-      service->ResetTimer(socketTimeoutTimer);
-      if (ec == std::errc::operation_canceled)
+      if (!ec) 
       {
-        Stop();
+        service->ResetTimer(socketTimeoutTimer);
+        Read(HttpParser::ParseState::RequestParsing);
       }
-      Read(HttpParser::ParseState::RequestParsing);
     });
   }
 

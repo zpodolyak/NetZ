@@ -13,7 +13,7 @@ namespace NetZ
     void CancelDescriptor(SocketHandle fd);
     bool HasRegisteredOperation(int type, ReactorOperation* op);
 
-    void Run(int timeout = 300);
+    void Run(int timeout = 1000 / 60);
     void Stop();
     bool IsRunning() const { return !shutdown; }
   private:
