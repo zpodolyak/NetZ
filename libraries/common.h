@@ -1,6 +1,6 @@
 #pragma once
 
-// std includes
+
 #include <vector>
 #include <set>
 #include <deque>
@@ -18,7 +18,7 @@
 #include <unordered_map>
 #include <system_error>
 
-// platform specific includes
+
 #ifdef PLATFORM_LINUX
 # include <linux/version.h>
 # if LINUX_VERSION_CODE >= KERNEL_VERSION(2,5,45)

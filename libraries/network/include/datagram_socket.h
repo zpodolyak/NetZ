@@ -5,36 +5,36 @@
 namespace NetZ
 {
   template <typename ProtocolType>
-  class StreamSocket : public SocketBase
+  class DatagramSocket : public SocketBase
   {
     typedef ProtocolType protocol_type;
 
   public:
-    StreamSocket()
+    DatagramSocket()
       : SocketBase()
     {
     }
 
-    StreamSocket(SocketService* _service)
+    DatagramSocket(SocketService* _service)
       : SocketBase(_service)
     {
     }
 
-    StreamSocket(const protocol_type& prot)
+    DatagramSocket(const protocol_type& prot)
       : SocketBase(prot)
     {
     }
 
-    StreamSocket(SocketService* _service, const protocol_type& prot)
+    DatagramSocket(SocketService* _service, const protocol_type& prot)
       : SocketBase(_service, prot)
     {
     }
 
-    int Send(const char* buffer, int length, int msg_flags)
+    int SendTo(const char* buffer, int length, int msg_flags, const ConnectionData& connData)
     {
       ClearLastError();
       std::error_code ec;
-      int bytes = ErrorWrapper(::send(socket, buffer, length, msg_flags), ec);
+      int bytes = ErrorWrapper(::sendto(socket, buffer, length, msg_flags, (const sockaddr*)&connData.data, sizeof(sockaddr_in)), ec);
 #ifndef WIN32
       if (ec == std::error_code((int)std::errc::resource_unavailable_try_again, std::system_category())
         || ec == std::error_code((int)std::errc::operation_would_block, std::system_category()))
@@ -47,18 +47,19 @@ namespace NetZ
     }
 
     template <typename Handler>
-    void Send(const char* buffer, int length, int msg_flags, Handler&& handler)
+    void SendTo(const char* buffer, int length, int msg_flags, const ConnectionData& connData, Handler&& handler)
     {
       if (socket == INVALID_SOCKET || !service)
         return;
-      service->RegisterOperation(ReactorOps::write, new SendOperation<Handler>(buffer, length, msg_flags, socket, std::forward<Handler>(handler)));
+      service->RegisterOperation(ReactorOps::write, new SendToOperation<Handler, ConnectionData>(buffer, length, msg_flags, socket, connData, std::forward<Handler>(handler)));
     }
 
-    int Receive(char* buffer, int length, int msg_flags = 0)
+    int ReceiveFrom(char* buffer, int length, int msg_flags, ConnectionData& connData)
     {
       ClearLastError();
       std::error_code ec;
-      int bytes = ErrorWrapper(::recv(socket, buffer, length, msg_flags), ec);
+      auto connLen = int(rcvOp->connData.Size());
+      int bytes = ErrorWrapper(::recvfrom(socket, buffer, length, msg_flags, (sockaddr*)&connData.data, &connLen), ec);
 #ifndef WIN32
       if (ec == std::error_code((int)std::errc::resource_unavailable_try_again, std::system_category())
         || ec == std::error_code((int)std::errc::operation_would_block, std::system_category()))
@@ -72,15 +73,14 @@ namespace NetZ
 
 
     template <typename Handler>
-    void Receive(char* buffer, int length, int msg_flags, Handler&& handler)
+    void ReceiveFrom(char* buffer, int length, int msg_flags, ConnectionData& connData, Handler&& handler)
     {
       if (socket == INVALID_SOCKET || !service)
         return;
-      service->RegisterOperation(ReactorOps::read, new ReceiveOperation<Handler>(buffer, length, msg_flags, socket, std::forward<Handler>(handler)));
+      service->RegisterOperation(ReactorOps::read, new ReceiveFromOperation<Handler, ConnectionData>(buffer, length, msg_flags, socket, connData, std::forward<Handler>(handler)));
     }
   };
 
-  using TcpSocket = StreamSocket<Tcp>;
+  using UdpSocket = DatagramSocket<Udp>;
 
 }
-

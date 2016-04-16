@@ -27,6 +27,11 @@ namespace NetZ
   {
     data.sin_port = ::htons(port);
   }
+
+  void ConnectionDataV4::SetData(const AddressV4& addr)
+  {
+    data.sin_addr.s_addr = addr.address.s_addr;
+  }
   
   std::size_t ConnectionDataV4::Size() const
   {

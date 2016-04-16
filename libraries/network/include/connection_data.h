@@ -12,6 +12,7 @@ namespace NetZ
 
     unsigned short GetPort() const;
     void SetPort(unsigned short port);
+    void SetData(const AddressV4& addr);
     std::size_t Size() const;
 
     sockaddr_in data;  
