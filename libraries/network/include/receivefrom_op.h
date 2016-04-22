@@ -25,7 +25,7 @@ namespace NetZ
       ReceiveFromOperation* rcvOp(static_cast<ReceiveFromOperation*>(op));
       auto connLen = int(rcvOp->connData.Size());
       rcvOp->bytes_transferred = ErrorWrapper(::recvfrom(rcvOp->descriptor, rcvOp->buffer, rcvOp->length, rcvOp->flags,
-                                              (sockaddr*)&rcvOp->connData.data, &connLen), ec);
+                                              (sockaddr*)&rcvOp->connData.data, (socklen_t*)&connLen), ec);
       if (rcvOp->bytes_transferred == 0)
         ec = std::make_error_code(std::errc::connection_aborted);
       rcvOp->CompleteOperation(ec);

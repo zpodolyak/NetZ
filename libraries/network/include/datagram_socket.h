@@ -58,7 +58,7 @@ namespace NetZ
     {
       ClearLastError();
       std::error_code ec;
-      auto connLen = int(rcvOp->connData.Size());
+      auto connLen = int(connData.Size());
       int bytes = ErrorWrapper(::recvfrom(socket, buffer, length, msg_flags, (sockaddr*)&connData.data, &connLen), ec);
 #ifndef WIN32
       if (ec == std::error_code((int)std::errc::resource_unavailable_try_again, std::system_category())
